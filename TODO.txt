@@ -1,0 +1,24 @@
+//short term
+use DI (for easier testing)
+mongo (need init for testrunning too)
+mongo schema for users
+mongo schema for ts data
+repositories for mongo collections
+write missing tests
+
+
+//mid term
+statistical data output apis
+user reg (or sth 3rd party)
+user mngment (or 3rd party?)
+service secret key acquireing
+
+
+//nice to have
+webUI
+use the exp in the jwt
+
+
+//done
+app structure
+optional jwt usage (need tests)
