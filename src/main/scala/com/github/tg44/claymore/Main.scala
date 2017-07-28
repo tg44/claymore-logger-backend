@@ -4,21 +4,36 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Directives._
 import com.github.tg44.claymore.api.service.ServiceApi
+import com.github.tg44.claymore.repository.MongoDb
+import com.github.tg44.claymore.repository.measures.MeasureRepo
+import com.github.tg44.claymore.repository.users.UserRepo
+import com.github.tg44.claymore.service.{AuthService, StatisticDataService}
+import scaldi.{Injectable, Module}
 
 import scala.concurrent.Future
 
-object Main extends App {
-
+object Main extends App with Injectable {
   import AkkaImplicits._
+
+  object MainModule extends Module {
+    binding toProvider new MongoDb
+    binding toProvider new UserRepo
+    binding toProvider new MeasureRepo
+
+    binding toProvider new ServiceApi
+
+    binding toProvider new AuthService
+    binding toProvider new StatisticDataService
+  }
 
   Config.SERVER
   startApplication
 
   def startApplication(): Unit = {
+    implicit val modules = MainModule
     import Config.SERVER
 
-    //implicit val modules = Modules :: SystemImplicits
-    val serviceApi = new ServiceApi()
+    val serviceApi = inject[ServiceApi]
 
     val routes = pathPrefix("api") {
       serviceApi.route

@@ -1,6 +1,7 @@
 package com.github.tg44.claymore.api.service
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import com.github.tg44.claymore.repository.measures.{CardStatistic, CurrencyInformation}
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 trait ServiceJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {

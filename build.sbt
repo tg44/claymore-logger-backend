@@ -25,7 +25,11 @@ libraryDependencies ++= Seq(
   "com.github.pureconfig" %% "pureconfig" % "0.7.2",
   "org.scalatest" %% "scalatest" % "3.0.3" % Test,
   "com.pauldijou" %% "jwt-json4s-native" % "0.12.0",
-  "org.json4s" %% "json4s-native" % "3.5.0"
+  "org.json4s" %% "json4s-native" % "3.5.0",
+  "org.mongodb.scala" %% "mongo-scala-driver" % "2.1.0",
+  "com.github.simplyscala" %% "scalatest-embedmongo" % "0.2.4" % Test,
+  "org.scaldi" %% "scaldi" % "0.5.8",
+  "org.scaldi" %% "scaldi-akka" % "0.5.8"
 )
 
 val format = TaskKey[Unit]("format", "Run format.") //this will create a new sbt task with no parameters

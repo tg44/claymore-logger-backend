@@ -1,9 +1,6 @@
 //short term
-use DI (for easier testing)
 mongo (need init for testrunning too)
-mongo schema for users
-mongo schema for ts data
-repositories for mongo collections
+repositories for mongo collections (actual implementations too)
 write missing tests
 
 

@@ -1,5 +1,7 @@
 package com.github.tg44.claymore.api
 
+import com.github.tg44.claymore.repository.measures.{CardStatistic, CurrencyInformation}
+
 package object service {
 
   case class ParsedStatisticResponse(
@@ -11,24 +13,6 @@ package object service {
       fansPerCard: Seq[Double],
       cards: Seq[CardStatistic]
   )
-
-  case class CurrencyInformation(
-      sumHR: Double,
-      shares: Int,
-      sharesRejected: Int,
-      invalidShares: Int,
-      poolSwitches: Int,
-      perCardHR: Seq[Double],
-      currentPool: String
-  )
-
-  case class CardStatistic(
-      ethHR: Double,
-      dcrHR: Double,
-      temp: Double,
-      fan: Double
-  )
-
   case class StatisticDataDto(
       name: String,
       remoteAddress: String,

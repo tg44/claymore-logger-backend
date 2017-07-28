@@ -5,12 +5,13 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives.{as, complete, entity, onSuccess, path, post, _}
 import akka.http.scaladsl.model.StatusCodes._
 import com.github.tg44.claymore.service.{AuthService, StatisticDataService}
+import scaldi.{Injectable, Injector}
 
-class ServiceApi extends ServiceJsonSupport {
+class ServiceApi(implicit injector: Injector) extends ServiceJsonSupport with Injectable {
   import com.github.tg44.claymore.jwt.Jwt._
 
-  private val authService = new AuthService()
-  private val statisticDataService = new StatisticDataService()
+  private val authService = inject[AuthService]
+  private val statisticDataService = inject[StatisticDataService]
 
   val route: Route = {
     path("jwt") {

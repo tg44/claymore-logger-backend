@@ -1,7 +1,12 @@
 package com.github.tg44.claymore.service
 
-import scala.concurrent.Future
+import com.github.tg44.claymore.repository.users.UserRepo
+import scaldi.{Injectable, Injector}
 
-class AuthService() {
+class AuthService(implicit injector: Injector) extends Injectable {
+
+  val userRepo = inject[UserRepo]
+
   def authenticateWithApiKey(secret: String): FResp[String] = ???
+
 }
