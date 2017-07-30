@@ -1,7 +1,6 @@
 //short term
-mongo (need init for testrunning too)
-repositories for mongo collections (actual implementations too)
-write missing tests
+create service implementations
+write missing api tests
 
 
 //mid term
@@ -19,3 +18,5 @@ use the exp in the jwt
 //done
 app structure
 optional jwt usage (need tests)
+di
+repository layer with tests

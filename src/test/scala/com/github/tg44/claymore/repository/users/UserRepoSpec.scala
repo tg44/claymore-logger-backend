@@ -25,6 +25,18 @@ class UserRepoSpec extends WordSpecLike with Matchers with Injectable {
     val user2With1Key = User("testId2", "test2@email.com", Seq(testKey2))
     val user2WithDuplicatedKey = User("testId2", "test2@email.com", Seq(testKey1))
 
+    "insert new user" must {
+
+      "add user" in withMongoDb { module =>
+        import module._
+        val userRepo = inject[UserRepo]
+        Await.result(userRepo.insertNewUser(user1), dbTimeout) shouldBe Completed()
+        val user = Await.result(userRepo.findUserByExtId("testId1"), dbTimeout)
+        user should matchPattern { case Some(User(_, "testId1", "test1@email.com", _)) => }
+        Await.result(userRepo.collection.count().toFuture, dbTimeout) shouldBe 1
+      }
+    }
+
     "find user by extid" must {
 
       "if it exists" in withMongoDb { module =>

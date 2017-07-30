@@ -1,7 +1,7 @@
 package com.github.tg44.claymore.repository
 
 import com.github.tg44.claymore.Config
-import com.github.tg44.claymore.repository.measures.Measure
+import com.github.tg44.claymore.repository.measures.{CardStatistic, CurrencyInformation, Measure, StatisticData}
 import com.github.tg44.claymore.repository.users.{ApiKey, User}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.mongodb.scala.{MongoClient, MongoDatabase}
@@ -14,6 +14,9 @@ trait MongoDb {
   val codecRegistry = fromRegistries(
     fromProviders(classOf[ApiKey]),
     fromProviders(classOf[User]),
+    fromProviders(classOf[CardStatistic]),
+    fromProviders(classOf[CurrencyInformation]),
+    fromProviders(classOf[StatisticData]),
     fromProviders(classOf[Measure]),
     DEFAULT_CODEC_REGISTRY
   )
