@@ -25,7 +25,7 @@ class ServiceApi(implicit injector: Injector) extends ServiceJsonSupport with In
     path("data") {
       authenticatedWithData { jwtData =>
         (post & entity(as[StatisticDataDto])) { statDataDto =>
-          onSuccess(statisticDataService.saveData(statDataDto)) {
+          onSuccess(statisticDataService.saveData(jwtData.userId, statDataDto)) {
             case Right(response) => complete(response.toString)
             case Left(_) => complete(HttpResponse(BadRequest))
           }

@@ -16,9 +16,12 @@ object AppFixture extends MongoEmbedDatabase {
 
   val dbTimeout = 3 seconds
 
+  var portCounter = 20000
+
   def withMongoDb(block: TestModule => Unit): Unit = {
     //TODO: this is not so safe...
-    val port = 20000 + Random.nextInt(40000)
+    portCounter += 1
+    val port = portCounter
     val mongodProps = mongoStart(port)
     implicit val modules = new TestModule(port)
     try { block(modules) } finally { Option(mongodProps).foreach(mongoStop) }

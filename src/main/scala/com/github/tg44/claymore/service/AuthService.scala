@@ -1,12 +1,22 @@
 package com.github.tg44.claymore.service
 
+import com.github.tg44.claymore.jwt.{Jwt, JwtPayload}
 import com.github.tg44.claymore.repository.users.UserRepo
 import scaldi.{Injectable, Injector}
 
-class AuthService(implicit injector: Injector) extends Injectable {
+import scala.concurrent.ExecutionContextExecutor
+
+class AuthService(implicit injector: Injector, ec: ExecutionContextExecutor) extends Injectable {
 
   val userRepo = inject[UserRepo]
 
-  def authenticateWithApiKey(secret: String): FResp[String] = ???
+  def authenticateWithApiKey(secret: String): FResp[String] = {
+
+    userRepo.findUserByApiKey(secret).map { usr =>
+      usr.fold[Resp[String]](
+        Left(AuthenticationError())
+      )(user => Right(Jwt.encode(JwtPayload(user.extid))))
+    }
+  }
 
 }
