@@ -37,13 +37,13 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
 
     "getMesuresInRange" must {
 
-      "throw exception to bad input parameters" in withMongoDb { module =>
+      "throw exception to bad input parameters" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         an[IllegalArgumentException] should be thrownBy Await.result(measureRepo.getMesuresInRange("testExtId", 500, 100), dbTimeout)
       }
 
-      "return nothing if no matching document" in withMongoDb { module =>
+      "return nothing if no matching document" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
@@ -51,7 +51,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         result.size shouldBe 0
       }
 
-      "return one if both from and to in a range" in withMongoDb { module =>
+      "return one if both from and to in a range" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
@@ -59,7 +59,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         result.size shouldBe 1
       }
 
-      "return one if only the to in a range" in withMongoDb { module =>
+      "return one if only the to in a range" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
@@ -67,7 +67,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         result.size shouldBe 1
       }
 
-      "return one if onli the from in a range" in withMongoDb { module =>
+      "return one if onli the from in a range" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
@@ -75,7 +75,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         result.size shouldBe 1
       }
 
-      "return multiple documents" in withMongoDb { module =>
+      "return multiple documents" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
@@ -83,7 +83,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         result.size shouldBe 3
       }
 
-      "give back document only for the requested user" in withMongoDb { module =>
+      "give back document only for the requested user" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
@@ -95,26 +95,26 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
 
     "saveNewMeasure" must {
 
-      "throw exception to bad period parameters" in withMongoDb { module =>
+      "throw exception to bad period parameters" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         an[IllegalArgumentException] should be thrownBy Await.result(measureRepo.saveNewMeasure("testExtId", createStatisticData(100), (500, 100)), dbTimeout)
       }
 
-      "throw exception to bad data timestamp parameters" in withMongoDb { module =>
+      "throw exception to bad data timestamp parameters" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         an[IllegalArgumentException] should be thrownBy Await.result(measureRepo.saveNewMeasure("testExtId", createStatisticData(100), (300, 400)), dbTimeout)
       }
 
-      "throw exception to bad number of documents given back from period" in withMongoDb { module =>
+      "throw exception to bad number of documents given back from period" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
         an[InvalidParameterException] should be thrownBy Await.result(measureRepo.saveNewMeasure("testExtId", createStatisticData(100), (100, 500)), dbTimeout)
       }
 
-      "create new document if needed" in withMongoDb { module =>
+      "create new document if needed" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
@@ -122,7 +122,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         Await.result(measureRepo.collection.count().toFuture, dbTimeout) shouldBe 5
       }
 
-      "append existing document if has any" in withMongoDb { module =>
+      "append existing document if has any" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)

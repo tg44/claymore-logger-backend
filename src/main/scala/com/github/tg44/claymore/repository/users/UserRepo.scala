@@ -1,6 +1,6 @@
 package com.github.tg44.claymore.repository.users
 
-import com.github.tg44.claymore.Config
+import com.github.tg44.claymore.config.Config
 import com.github.tg44.claymore.repository.MongoDb
 import org.mongodb.scala.{Completed, MongoCollection}
 import org.mongodb.scala.model.Filters._
@@ -15,7 +15,8 @@ class UserRepo(implicit injector: Injector, ec: ExecutionContextExecutor) extend
   import com.github.tg44.claymore.utils.GeneralUtil._
 
   val mongoDb = inject[MongoDb]
-  val collection: MongoCollection[User] = mongoDb.database.getCollection[User](Config.MONGO.userCollection)
+  val config = inject[Config]
+  val collection: MongoCollection[User] = mongoDb.database.getCollection[User](config.MONGO.userCollection)
 
   def findUserByExtId(extId: String): Future[Option[User]] = {
     collection.find(equal("extid", extId)).limit(2).toFuture.map(list => if (list.size == 1) Option(list.head) else None)

@@ -1,23 +1,26 @@
 package com.github.tg44.claymore.utils
 
 import com.github.simplyscala.MongoEmbedDatabase
-import com.github.tg44.claymore.Config
 import com.github.tg44.claymore.Main.MainModule.binding
 import com.github.tg44.claymore.api.service.ServiceApi
-import com.github.tg44.claymore.repository.MongoDb
+import com.github.tg44.claymore.config._
+import com.github.tg44.claymore.jwt.Jwt
+import com.github.tg44.claymore.repository.{MongoDb, MongoDbImpl}
 import com.github.tg44.claymore.repository.measures.{Measure, MeasureRepo}
 import com.github.tg44.claymore.repository.users.{ApiKey, User, UserRepo}
 import com.github.tg44.claymore.service.{AuthService, StatisticDataService}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.mongodb.scala.{MongoClient, MongoDatabase}
 import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
-import scaldi.Module
+import scaldi.{Injectable, Injector, Module}
 
 import scala.concurrent.ExecutionContextExecutor
 
-class TestModule(port: Int)(implicit ec: ExecutionContextExecutor) extends Module {
+class TestModule(serverConfig: Server, mongoConfig: MongoConfig, clientConfig: ClientConfig)(implicit ec: ExecutionContextExecutor) extends Module {
+  binding toProvider new TestConfigImpl(serverConfig, mongoConfig, clientConfig)
+  binding toProvider new Jwt
 
-  binding toProvider new TestMongoDbImpl(port)
+  binding toProvider new MongoDbImpl
   binding toProvider new UserRepo
   binding toProvider new MeasureRepo
 
@@ -28,7 +31,8 @@ class TestModule(port: Int)(implicit ec: ExecutionContextExecutor) extends Modul
 
 }
 
-class TestMongoDbImpl(port: Int) extends MongoDb {
-  val mongoClient: MongoClient = MongoClient(s"mongodb://localhost:$port")
-  val database: MongoDatabase = mongoClient.getDatabase(Config.MONGO.database).withCodecRegistry(codecRegistry)
+class TestConfigImpl(serverConfig: Server, mongoConfig: MongoConfig, clientConfig: ClientConfig) extends Config {
+  lazy val SERVER: Server = serverConfig
+  lazy val MONGO: MongoConfig = mongoConfig
+  lazy val CLIENT: ClientConfig = clientConfig
 }

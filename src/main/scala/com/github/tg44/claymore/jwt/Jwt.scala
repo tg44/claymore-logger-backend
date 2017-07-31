@@ -3,11 +3,12 @@ package com.github.tg44.claymore.jwt
 import pdi.jwt.{JwtAlgorithm, JwtJson4s}
 import akka.http.scaladsl.server.Directives.{headerValueByName, pass, provide, reject}
 import akka.http.scaladsl.server.{AuthorizationFailedRejection, Directive0, Directive1}
-import com.github.tg44.claymore.Config
+import com.github.tg44.claymore.config.Config
+import scaldi.{Injectable, Injector}
 
 import scala.util.{Failure, Success, Try}
 
-object Jwt {
+class Jwt(implicit injector: Injector) extends Injectable {
   import org.json4s._
   import org.json4s.native.JsonMethods._
 
@@ -15,8 +16,10 @@ object Jwt {
 
   private[this] val JWT_HEADER_NAME = "Authorization"
 
-  lazy val skipThis = !Config.SERVER.needAuth
-  lazy val jwtSecret = Config.SERVER.jwt.secret
+  val config = inject[Config]
+
+  lazy val skipThis = !config.SERVER.needAuth
+  lazy val jwtSecret = config.SERVER.jwt.secret
 
   def encode[T <: AnyRef](claim: T)(implicit formats: Formats): String = {
     import org.json4s.native.Serialization.write

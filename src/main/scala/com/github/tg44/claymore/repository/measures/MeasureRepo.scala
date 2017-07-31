@@ -2,7 +2,7 @@ package com.github.tg44.claymore.repository.measures
 
 import java.security.InvalidParameterException
 
-import com.github.tg44.claymore.Config
+import com.github.tg44.claymore.config.Config
 import com.github.tg44.claymore.repository.MongoDb
 import org.mongodb.scala.{Completed, MongoCollection}
 import org.mongodb.scala.model.Filters._
@@ -13,7 +13,9 @@ import scala.concurrent.{ExecutionContextExecutor, Future}
 
 class MeasureRepo(implicit injector: Injector, ec: ExecutionContextExecutor) extends Injectable {
   val mongoDb = inject[MongoDb]
-  val collection: MongoCollection[Measure] = mongoDb.database.getCollection[Measure](Config.MONGO.measureCollection)
+  val config = inject[Config]
+
+  val collection: MongoCollection[Measure] = mongoDb.database.getCollection[Measure](config.MONGO.measureCollection)
 
   def getMesuresInRange(userExtId: String, from: Long, to: Long): Future[Seq[Measure]] = {
     require(from <= to)

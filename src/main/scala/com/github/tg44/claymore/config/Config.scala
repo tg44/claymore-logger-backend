@@ -1,15 +1,14 @@
-package com.github.tg44.claymore
+package com.github.tg44.claymore.config
 
 import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
 
-object Config {
+trait Config {
+  val SERVER: Server
+  val MONGO: MongoConfig
+  val CLIENT: ClientConfig
+}
 
-  case class Server(url: String, port: Int, needAuth: Boolean, jwt: JwtProperties)
-  case class JwtProperties(secret: String, exp: Long)
-
-  case class ClientConfig(defaultWaitTimeInSecs: Long)
-
-  case class MongoConfig(url: String, database: String, userCollection: String, measureCollection: String)
+class ConfigImpl extends Config {
 
   private[this] implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
