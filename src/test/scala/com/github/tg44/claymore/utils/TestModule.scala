@@ -32,7 +32,7 @@ class TestModule(serverConfig: Server, mongoConfig: MongoConfig, clientConfig: C
 }
 
 class TestConfigImpl(serverConfig: Server, mongoConfig: MongoConfig, clientConfig: ClientConfig) extends Config {
-  lazy val SERVER: Server = serverConfig
-  lazy val MONGO: MongoConfig = mongoConfig
-  lazy val CLIENT: ClientConfig = clientConfig
+  val SERVER: Server = serverConfig
+  val MONGO: MongoConfig = mongoConfig
+  val CLIENT: ClientConfig = clientConfig
 }

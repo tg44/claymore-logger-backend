@@ -1,5 +1,7 @@
 package com.github.tg44.claymore.repository.users
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import com.github.simplyscala.MongoEmbedDatabase
 import com.github.tg44.claymore.utils.AppFixture.withMongoDb
 import com.github.tg44.claymore.utils.GeneralUtil
@@ -12,6 +14,9 @@ import scala.concurrent.Await
 class UserRepoSpec extends WordSpecLike with Matchers with Injectable {
 
   import com.github.tg44.claymore.utils.AppFixture._
+  implicit val system: ActorSystem = ActorSystem("test")
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val ec = system.dispatcher
 
   "UserRepo" must {
 

@@ -1,22 +1,19 @@
 //short term
-create service implementations
-write missing api tests
-
+refactor the measurement data for more generic format
+google auth
+service secret key acquireing
 
 //mid term
 statistical data output apis
-user reg (or sth 3rd party)
-user mngment (or 3rd party?)
-service secret key acquireing
-
+webUI
 
 //nice to have
-webUI
 use the exp in the jwt
+ratelimit the jwt requester api
 
 
 //done
 app structure
-optional jwt usage (need tests)
+optional jwt usage with tests
 di
 repository layer with tests

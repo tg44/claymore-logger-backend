@@ -15,8 +15,9 @@ class StatisticDataService(implicit injector: Injector, ec: ExecutionContextExec
 
   def saveData(extId: String, statData: StatisticDataDto): FResp[Long] = {
     val time = GeneralUtil.nowInUnix
-    measureRepo.saveNewMeasure(extId, createStatisticDataFromDto(time, statData), GeneralUtil.generatePeriod(time))
-    Future.successful(Right(config.CLIENT.defaultWaitTimeInSecs))
+    measureRepo
+      .saveNewMeasure(extId, createStatisticDataFromDto(time, statData), GeneralUtil.generatePeriod(time))
+      .map(_ => Right(config.CLIENT.defaultWaitTimeInSecs))
   }
 
   def createStatisticDataFromDto(time: Long, statData: StatisticDataDto): StatisticData = {

@@ -2,6 +2,8 @@ package com.github.tg44.claymore.repository.measures
 
 import java.security.InvalidParameterException
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import com.github.tg44.claymore.repository.users.UserRepo
 import org.scalatest.{Matchers, WordSpecLike}
 import scaldi.Injectable
@@ -11,6 +13,9 @@ import scala.concurrent.Await
 class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
 
   import com.github.tg44.claymore.utils.AppFixture._
+  implicit val system: ActorSystem = ActorSystem("test")
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val ec = system.dispatcher
 
   "MeasureRepo" must {
 
@@ -119,6 +124,14 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
         Await.result(measureRepo.saveNewMeasure("testExtId", createStatisticData(351), (350, 370)), dbTimeout)
+        Await.result(measureRepo.collection.count().toFuture, dbTimeout) shouldBe 5
+      }
+
+      "create new document for new user" in withMongoDb() { module =>
+        import module._
+        val measureRepo = inject[MeasureRepo]
+        insertTestDataset(measureRepo)
+        Await.result(measureRepo.saveNewMeasure("testExtId100", createStatisticData(351), (350, 370)), dbTimeout)
         Await.result(measureRepo.collection.count().toFuture, dbTimeout) shouldBe 5
       }
 

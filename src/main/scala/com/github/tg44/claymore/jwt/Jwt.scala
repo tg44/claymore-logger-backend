@@ -44,7 +44,7 @@ class Jwt(implicit injector: Injector) extends Injectable {
 
   private[this] def extractAuthorizationHeader: Directive1[String] =
     if (skipThis) {
-      provide(encode(godJwtPayload))
+      provide("Bearer " + encode(godJwtPayload))
     } else {
       headerValueByName(JWT_HEADER_NAME)
     }

@@ -5,6 +5,9 @@ import com.github.tg44.claymore.repository.measures.{CardStatistic, CurrencyInfo
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 trait ServiceJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
+  import org.json4s.DefaultFormats
+  implicit val jsonFormats = DefaultFormats
+
   implicit val cardStatisticsJsonFormatter: RootJsonFormat[CardStatistic] = jsonFormat4(CardStatistic)
   implicit val currencyInformationJsonFormatter: RootJsonFormat[CurrencyInformation] = jsonFormat7(CurrencyInformation)
   implicit val parsedStatisticResponseJsonFormatter: RootJsonFormat[ParsedStatisticResponse] = jsonFormat7(ParsedStatisticResponse)

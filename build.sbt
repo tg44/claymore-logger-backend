@@ -37,3 +37,5 @@ format := ScalafmtBootstrap.main(Seq("--non-interactive")) //this will assign a 
 
 val formatTest = TaskKey[Unit]("formatTest", "Run formatTest.") //this will create a new sbt task with no parameters
 formatTest := ScalafmtBootstrap.main(Seq("--non-interactive", "--test")) //this will assign a plugin's main class to the formatTest
+
+parallelExecution in Test := false //I hate this but TravisCi not like the embedmongo the way I use :(
