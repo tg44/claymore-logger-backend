@@ -17,14 +17,14 @@ case class StatisticData(
     remotePort: Int,
     minerVersion: String,
     runTimeInMins: Double,
-    eth: CurrencyInformation,
-    dcr: CurrencyInformation,
+    currencyInformations: Seq[CurrencyInformation],
     tempsPerCard: Seq[Double],
     fansPerCard: Seq[Double],
     cards: Seq[CardStatistic]
 )
 
 case class CurrencyInformation(
+    currency: String,
     sumHR: Double,
     shares: Int,
     sharesRejected: Int,

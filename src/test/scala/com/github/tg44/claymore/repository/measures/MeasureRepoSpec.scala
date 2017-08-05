@@ -4,7 +4,6 @@ import java.security.InvalidParameterException
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.github.tg44.claymore.repository.users.UserRepo
 import org.scalatest.{Matchers, WordSpecLike}
 import scaldi.Injectable
 
@@ -36,8 +35,8 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
     }
 
     def createStatisticData(time: Long): StatisticData = {
-      val ci = CurrencyInformation(0.0, 1, 1, 1, 1, Nil, "")
-      StatisticData(time, "", "", 1, "", 1.0, ci, ci, Nil, Nil, Nil)
+      val ci = CurrencyInformation("eth", 0.0, 1, 1, 1, 1, Nil, "")
+      StatisticData(time, "", "", 1, "", 1.0, Seq(ci), Nil, Nil, Nil)
     }
 
     "getMesuresInRange" must {

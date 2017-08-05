@@ -28,8 +28,7 @@ class StatisticDataService(implicit injector: Injector, ec: ExecutionContextExec
       statData.remotePort,
       statData.data.minerVersion,
       statData.data.runTimeInMins,
-      statData.data.eth,
-      statData.data.dcr,
+      statData.data.currencyInformations,
       statData.data.tempsPerCard,
       statData.data.fansPerCard,
       statData.data.cards
