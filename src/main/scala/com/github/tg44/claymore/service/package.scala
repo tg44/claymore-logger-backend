@@ -10,5 +10,5 @@ package object service {
   implicit val jsonFormats = DefaultFormats
 
   abstract class ErrorResponse()
-  case class AuthenticationError() extends ErrorResponse
+  case object AuthenticationError extends ErrorResponse
 }

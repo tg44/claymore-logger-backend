@@ -1,7 +1,6 @@
 //short term
-refactor the measurement data for more generic format
-google auth
-service secret key acquireing
+google auth - test
+service secret key acquiring - test
 
 //mid term
 statistical data output apis

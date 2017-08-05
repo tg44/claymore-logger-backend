@@ -6,6 +6,7 @@ trait Config {
   val SERVER: Server
   val MONGO: MongoConfig
   val CLIENT: ClientConfig
+  val GOOGLE: GoogleAuthConfig
 }
 
 class ConfigImpl extends Config {
@@ -17,4 +18,5 @@ class ConfigImpl extends Config {
   lazy val SERVER: Server = loadConfigOrThrow[Server]("endpoint")
   lazy val MONGO: MongoConfig = loadConfigOrThrow[MongoConfig]("mongo")
   lazy val CLIENT: ClientConfig = loadConfigOrThrow[ClientConfig]("client")
+  lazy val GOOGLE: GoogleAuthConfig = loadConfigOrThrow[GoogleAuthConfig]("googleAuth")
 }
