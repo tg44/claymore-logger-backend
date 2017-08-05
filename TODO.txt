@@ -1,6 +1,6 @@
 //short term
-google auth - test
-service secret key acquiring - test
+test out google auth
+
 
 //mid term
 statistical data output apis
@@ -9,6 +9,8 @@ webUI
 //nice to have
 use the exp in the jwt
 ratelimit the jwt requester api
+limit the apikey-s number for mongo security reasons
+refactor the public/private things in general
 
 
 //done
@@ -16,3 +18,4 @@ app structure
 optional jwt usage with tests
 di
 repository layer with tests
+service secret key acquiring

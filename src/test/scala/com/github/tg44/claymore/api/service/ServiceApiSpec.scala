@@ -1,10 +1,11 @@
 package com.github.tg44.claymore.api.service
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server._
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import com.github.tg44.claymore.config.{JwtProperties, Server}
 import com.github.tg44.claymore.jwt.{Jwt, JwtPayload}
 import com.github.tg44.claymore.repository.measures.{CurrencyInformation, MeasureRepo}
@@ -13,10 +14,12 @@ import org.scalatest.{Matchers, WordSpec}
 import scaldi.Injectable
 
 import scala.concurrent.Await
+import scala.concurrent.duration._
 
 class ServiceApiSpec extends WordSpec with Matchers with ScalatestRouteTest with Injectable with ServiceJsonSupport {
 
   import com.github.tg44.claymore.utils.AppFixture._
+  implicit def default(implicit system: ActorSystem) = RouteTestTimeout(5.seconds)
 
   "ServiceApi" must {
 

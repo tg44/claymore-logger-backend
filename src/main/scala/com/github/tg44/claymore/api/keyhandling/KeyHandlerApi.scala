@@ -27,9 +27,9 @@ class KeyHandlerApi(implicit injector: Injector) extends Injectable with KeysJso
     } ~
     path("load") {
       authenticatedWithData { jwtData =>
-        (post & entity(as[Name])) { nameDao =>
+        get {
           onSuccess(authService.listAllApiKeys(jwtData.userId)) {
-            case Right(response) => complete(response)
+            case Right(response) => complete(ApiKeyList(response))
             case Left(_) => complete(HttpResponse(BadRequest))
           }
         }
