@@ -12,6 +12,7 @@ import com.github.tg44.claymore.repository.MongoDbImpl
 import com.github.tg44.claymore.repository.measures.MeasureRepo
 import com.github.tg44.claymore.repository.users.UserRepo
 import com.github.tg44.claymore.service.{AuthService, StatisticDataService}
+import pureconfig.loadConfigOrThrow
 import scaldi.Module
 
 import scala.concurrent.ExecutionContextExecutor
@@ -41,4 +42,5 @@ class TestConfigImpl(serverConfig: Server, mongoConfig: MongoConfig, clientConfi
   val MONGO: MongoConfig = mongoConfig
   val CLIENT: ClientConfig = clientConfig
   val GOOGLE: GoogleAuthConfig = GoogleAuthConfig("", "", "", "")
+  lazy val SPENDPOINTS: SinglePageURLs = loadConfigOrThrow[SinglePageURLs]("singlePageUrls")
 }

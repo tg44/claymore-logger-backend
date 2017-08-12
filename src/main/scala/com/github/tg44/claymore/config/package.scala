@@ -9,4 +9,6 @@ package object config {
   case class MongoConfig(url: String, database: String, userCollection: String, measureCollection: String)
 
   case class GoogleAuthConfig(clientId: String, clientSecret: String, callback: String, scope: String)
+
+  case class SinglePageURLs(callbackAfterAuth: String)
 }

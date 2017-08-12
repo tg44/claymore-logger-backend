@@ -10,6 +10,11 @@ import com.github.tg44.claymore.config.Config
 import com.github.tg44.claymore.jwt.{Jwt, JwtPayload}
 import com.github.tg44.claymore.repository.users.{ApiKey, User, UserRepo}
 import com.github.tg44.claymore.service.AuthService.{AuthResponse, AuthServiceJsonSupport, UserInfo}
+import com.google.common.cache.{Cache, CacheBuilder}
+import java.util.concurrent.TimeUnit
+
+import akka.util.ByteString
+import com.github.tg44.claymore.utils.GeneralUtil
 import scaldi.{Injectable, Injector}
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
@@ -29,12 +34,23 @@ class AuthService(implicit injector: Injector, ec: ExecutionContextExecutor, sys
   private val tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token"
   private val userInfoEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
 
+  private val cache: Cache[String, String] = CacheBuilder
+    .newBuilder()
+    .expireAfterWrite(5, TimeUnit.MINUTES)
+    .build()
+
   def authenticateWithApiKey(secret: String): FResp[String] = {
     userRepo.findUserByApiKey(secret).map { usr =>
       usr.fold[Resp[String]](
         Left(AuthenticationError)
       )(user => Right(jwt.encode(JwtPayload(user.extid))))
     }
+  }
+
+  def authenticateWithTemporalKey(secret: String): FResp[String] = {
+    val jwtStr = Option(cache.getIfPresent(secret))
+    cache.invalidate(secret)
+    Future.successful(jwtStr.toRight(AuthenticationError))
   }
 
   def insertNewApiKey(userExtId: String, name: String): FResp[ApiKey] = {
@@ -57,16 +73,20 @@ class AuthService(implicit injector: Injector, ec: ExecutionContextExecutor, sys
       )
   }
 
-  def authenticateWithGoogle(code: String, state: String): FResp[String] = {
+  def authenticateWithGoogle(code: String): FResp[String] = {
     (for {
       ac <- getAccessToken(code).map(_.access_token)
       userInfo <- getUserInfo(ac)
     } yield userInfo) flatMap { userInfo =>
-      userRepo.findUserByExtId(userInfo.id).flatMap { dbUser =>
-        if (dbUser.isEmpty) {
-          userRepo.insertNewUser(User(userInfo.id, userInfo.email, Nil)).map(_ => Right(jwt.encode(JwtPayload(userInfo.id))))
-        } else {
-          Future.successful(Right(jwt.encode(JwtPayload(userInfo.id))))
+      {
+        userRepo.findUserByExtId(userInfo.sub).flatMap { dbUser =>
+          {
+            if (dbUser.isEmpty) {
+              userRepo.insertNewUser(User(userInfo.sub, userInfo.email, Nil)).map(_ => addJwtToCache(userInfo.sub))
+            } else {
+              Future.successful(addJwtToCache(userInfo.sub))
+            }
+          }
         }
       }
     } recover {
@@ -74,16 +94,22 @@ class AuthService(implicit injector: Injector, ec: ExecutionContextExecutor, sys
     }
   }
 
+  def addJwtToCache(extId: String): Resp[String] = {
+    val jwtStr = jwt.encode(JwtPayload(extId))
+    val uid = GeneralUtil.uuid
+    cache.put(uid, jwtStr)
+    Right(uid)
+  }
+
   def getAuthUrl: Resp[String] = {
-    Right(
-      s"""$authorizationEndpoint?
-         |client_id=${config.GOOGLE.clientId}&
-         |redirect_uri=${config.GOOGLE.callback}&
-         |response_type=code&
-         |scope=${config.GOOGLE.scope}&
-         |access_type=online
-         |""".stripMargin
-    )
+    val url = s"""$authorizationEndpoint?
+                 |client_id=${config.GOOGLE.clientId}&
+                 |redirect_uri=${config.GOOGLE.callback}&
+                 |response_type=code&
+                 |scope=${config.GOOGLE.scope}&
+                 |access_type=online
+                 |""".stripMargin.replaceAll("[\r\n]+", "")
+    Right(url)
   }
 
   private def getAccessToken(code: String) = {
@@ -128,7 +154,7 @@ object AuthService {
   }
 
   case class UserInfo(
-      id: String,
+      sub: String,
       name: String,
       given_name: String,
       family_name: String,

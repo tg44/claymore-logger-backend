@@ -22,6 +22,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+  "com.google.guava" % "guava" % "23.0",
   "com.github.pureconfig" %% "pureconfig" % "0.7.2",
   "org.scalatest" %% "scalatest" % "3.0.3" % Test,
   "com.pauldijou" %% "jwt-json4s-native" % "0.12.0",
