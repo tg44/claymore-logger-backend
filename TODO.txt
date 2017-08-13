@@ -1,16 +1,39 @@
 //short term
-test out google auth
+chart data apis
+make the dto fix to the service too
+refactor the api keys and measures and make them shareable between users
+statistical data output apis
+
+
+
+//stat data graphs
+linechart - avgtemp/host
+- per currency
+    linechart - sum hashrate/host
+    linechart - shares/rejected/invalid sum to all hosts
+- per host
+    area - runtime
+    linechart - temp and fan /card
+
+//stat data
+list hosts and currencies
+- per host - last measured data in a human readable format
+- per currencies - last measures aggregated to all hosts show only currency informations
+
+
 
 
 //mid term
-statistical data output apis
-webUI
+webUI - apikey features
+webUI - chart features
 
 //nice to have
 use the exp in the jwt
 ratelimit the jwt requester api
 limit the apikey-s number for mongo security reasons
 refactor the public/private things in general
+use scapegoat
+db cleanup actor
 
 
 //done
@@ -19,3 +42,4 @@ optional jwt usage with tests
 di
 repository layer with tests
 service secret key acquiring
+google auth working

@@ -8,7 +8,7 @@ trait ServiceJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   import org.json4s.DefaultFormats
   implicit val jsonFormats = DefaultFormats
 
-  implicit val cardStatisticsJsonFormatter: RootJsonFormat[CardStatistic] = jsonFormat4(CardStatistic)
+  implicit val cardStatisticsJsonFormatter: RootJsonFormat[CardStatistic] = jsonFormat3(CardStatistic)
   implicit val currencyInformationJsonFormatter: RootJsonFormat[CurrencyInformation] = jsonFormat8(CurrencyInformation)
   implicit val parsedStatisticResponseJsonFormatter: RootJsonFormat[ParsedStatisticResponse] = jsonFormat6(ParsedStatisticResponse)
 
