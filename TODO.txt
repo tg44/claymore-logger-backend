@@ -1,8 +1,6 @@
 //short term
-chart data apis - needs massive testing
-make the dto fix to the service too
+statistical data output api - need test
 refactor the api keys and measures and make them shareable between users
-statistical data output apis
 
 
 
@@ -43,3 +41,4 @@ di
 repository layer with tests
 service secret key acquiring
 google auth working
+chart data apis
