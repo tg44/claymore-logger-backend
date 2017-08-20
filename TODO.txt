@@ -1,5 +1,5 @@
 //short term
-chart data apis
+chart data apis - needs massive testing
 make the dto fix to the service too
 refactor the api keys and measures and make them shareable between users
 statistical data output apis
@@ -9,7 +9,7 @@ statistical data output apis
 //stat data graphs
 linechart - avgtemp/host
 - per currency
-    linechart - sum hashrate/host
+    linechart - sum hashrate
     linechart - shares/rejected/invalid sum to all hosts
 - per host
     area - runtime
