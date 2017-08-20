@@ -3,6 +3,9 @@ package com.github.tg44.claymore.utils
 import java.text.SimpleDateFormat
 import java.util.{Date, TimeZone}
 
+import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
+
 object GeneralUtil {
 
   // 10000 seconds is means nearly 3h goes to 1 doc
@@ -30,4 +33,14 @@ object GeneralUtil {
 
   def nowInUnix: Long = System.currentTimeMillis / 1000
   def uuid = java.util.UUID.randomUUID.toString
+
+  def transpose[T](xss: Seq[Seq[T]]): Seq[Seq[T]] = {
+    val b = new ListBuffer[Seq[T]]
+    var y = xss filter (_.nonEmpty)
+    while (y.nonEmpty) {
+      b += y map (_.head)
+      y = y map (_.tail) filter (_.nonEmpty)
+    }
+    b.toList
+  }
 }

@@ -19,7 +19,6 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
     val aggregatedCurrenciesByTime = aggregateCurrenciesByTime(measures)
     Charts(
       computeAvgTempPerHost(aggregatedMeasuresByHost),
-      computeRuntimePerHost(aggregatedMeasuresByHost),
       computeHashratePerCurrencie(aggregatedCurrenciesByTime),
       computeSharesPerCurrencie(aggregatedCurrenciesByTime),
       computeTempPerHostPerCard(aggregatedMeasuresByHost),
@@ -27,55 +26,57 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
     )
   }
 
-  private def computeHashratePerCurrencie(aggregatedCurrenciesByTime: Map[String, Map[Long, Seq[CurrencyInformation]]]) = {
+  private[service] def computeHashratePerCurrencie(aggregatedCurrenciesByTime: Map[String, Map[Long, Seq[CurrencyInformation]]]) = {
     val data = aggregatedCurrenciesByTime.mapValues(_.map(createHashRateChartData).toList)
 
     mapToSingleLineChartSeq(data)
   }
 
-  private def computeSharesPerCurrencie(aggregatedCurrenciesByTime: Map[String, Map[Long, Seq[CurrencyInformation]]]): Seq[MultilineChart] = {
+  private[service] def computeSharesPerCurrencie(aggregatedCurrenciesByTime: Map[String, Map[Long, Seq[CurrencyInformation]]]): Seq[MultilineChart] = {
     val data: Map[String, (Iterable[ChartData], Iterable[ChartData], Iterable[ChartData])] =
       aggregatedCurrenciesByTime.mapValues(_.map(createSharesChartData).unzip3)
 
     data.map {
       case (key, value) =>
-        MultilineChart(Seq(value._1.toList, value._2.toList, value._3.toList), Seq("valid", "invalid", "rejected"), key)
+        MultilineChart(Seq(value._1.toList.sortBy(_.date), value._2.toList.sortBy(_.date), value._3.toList.sortBy(_.date)),
+                       Seq("valid", "invalid", "rejected"),
+                       key)
     }.toList
   }
 
-  private def computeAvgTempPerHost(aggregatedMeasuresByHost: Map[String, Seq[StatisticData]]): MultilineChart = {
-    val data = aggregatedMeasuresByHost.mapValues(_.map(createTempAvgChartData))
+  private[service] def computeAvgTempPerHost(aggregatedMeasuresByHost: Map[String, Seq[StatisticData]]): MultilineChart = {
+    val data = aggregatedMeasuresByHost.mapValues(_.map(createTempAvgChartData).sortBy(_.date))
 
     MultilineChart(data.values.toList, data.keys.toList, "avgTemp")
   }
 
-  private def computeRuntimePerHost(aggregatedMeasuresByHost: Map[String, Seq[StatisticData]]): Seq[SingleLineChart] = {
+  /*private def computeRuntimePerHost(aggregatedMeasuresByHost: Map[String, Seq[StatisticData]]): Seq[SingleLineChart] = {
     val data = aggregatedMeasuresByHost.mapValues(_.map(createRuntimeChartData))
 
     mapToSingleLineChartSeq(data)
-  }
+  }*/
 
-  private def computeTempPerHostPerCard(aggregatedMeasuresByHost: Map[String, Seq[StatisticData]]): Seq[MultilineChart] = {
+  private[service] def computeTempPerHostPerCard(aggregatedMeasuresByHost: Map[String, Seq[StatisticData]]): Seq[MultilineChart] = {
     aggregatedMeasuresByHost
       .mapValues(_.map(createTempChartData))
       .map {
         case (k, v) =>
-          MultilineChart(v, v.zipWithIndex.map { case (_, i) => s"card$i" }, k + " temp/card")
+          MultilineChart(GeneralUtil.transpose(v), v.zipWithIndex.map { case (_, i) => s"card$i" }, k + " temp/card")
       }
       .toList
   }
 
-  private def computeFanPerHostPerCard(aggregatedMeasuresByHost: Map[String, Seq[StatisticData]]): Seq[MultilineChart] = {
+  private[service] def computeFanPerHostPerCard(aggregatedMeasuresByHost: Map[String, Seq[StatisticData]]): Seq[MultilineChart] = {
     aggregatedMeasuresByHost
       .mapValues(_.map(createFanChartData))
       .map {
         case (k, v) =>
-          MultilineChart(v, v.zipWithIndex.map { case (_, i) => s"card$i" }, k + " fan/card")
+          MultilineChart(GeneralUtil.transpose(v), v.zipWithIndex.map { case (_, i) => s"card$i" }, k + " fan/card")
       }
       .toList
   }
 
-  private def aggregateMeasuresByHost(measures: Seq[Measure]): Map[String, Seq[StatisticData]] = {
+  private[service] def aggregateMeasuresByHost(measures: Seq[Measure]): Map[String, Seq[StatisticData]] = {
     measures
       .map(measure => measure.data.groupBy(mData => mData.endpointName))
       .foldLeft(Map[String, Seq[StatisticData]]()) {
@@ -88,12 +89,12 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
       .mapValues(dataList => dataList.sortBy(data => data.timeStamp))
   }
 
-  private def aggregateCurrenciesByTime(measures: Seq[Measure]): Map[String, Map[Long, Seq[CurrencyInformation]]] = {
+  private[service] def aggregateCurrenciesByTime(measures: Seq[Measure], frame: Long = 300): Map[String, Map[Long, Seq[CurrencyInformation]]] = {
     val lower = measures.minBy(_.fromTimeStamp).fromTimeStamp
     val measureToMax = measures.maxBy(_.toTimeStamp).toTimeStamp
     val upper = if (measureToMax > GeneralUtil.nowInUnix) GeneralUtil.nowInUnix else measureToMax
 
-    val timestamps = GeneralUtil.generateTimeStamps(lower, upper, 300)
+    val timestamps = GeneralUtil.generateTimeStamps(lower, upper, frame)
 
     measures
       .flatMap(_.data)
@@ -111,13 +112,13 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
   private def aggregateByTime(rawData: Seq[(Long, CurrencyInformation)], timeStamps: Seq[Long]): Map[Long, Seq[CurrencyInformation]] = {
     rawData.foldLeft(Map[Long, Seq[CurrencyInformation]]()) {
       case (acc, element) =>
-        val convertedTs: Long = timeStamps.foldLeft(timeStamps.head)((a, c) => if (c < element._1) c else a)
+        val convertedTs: Long = timeStamps.foldLeft(timeStamps.head)((a, c) => if (c <= element._1) c else a)
         acc + (convertedTs -> (acc.getOrElse(convertedTs, Seq.empty[CurrencyInformation]) ++ Seq(element._2)))
     }
   }
 
   private def mapToSingleLineChartSeq(map: Map[String, Seq[ChartData]]) = {
-    map.map { case (title, data) => SingleLineChart(data, title) }.toList
+    map.map { case (title, data) => SingleLineChart(data.sortBy(_.date), title) }.toList
   }
 
   private def createTempAvgChartData(data: StatisticData): ChartData = {
@@ -129,7 +130,7 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
   }
 
   private def createTempChartData(data: StatisticData): Seq[ChartData] = {
-    data.cards.map(stat => ChartData(GeneralUtil.convertTimeStampToChartString(data.timeStamp), stat.temp))
+    data.cards.map(stat => ChartData(GeneralUtil.convertTimeStampToChartString(data.timeStamp), stat.temp)).sortBy(_.date)
   }
 
   private def createFanChartData(data: StatisticData): Seq[ChartData] = {
@@ -151,7 +152,6 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
 
 case class Charts(
     avgTempPerHost: MultilineChart,
-    runtimePerHost: Seq[SingleLineChart], //in days
     currencyHashrateCharts: Seq[SingleLineChart],
     sharesPerCurrencies: Seq[MultilineChart],
     tempPerCardPerHost: Seq[MultilineChart],
