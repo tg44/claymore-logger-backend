@@ -12,7 +12,7 @@ import com.github.tg44.claymore.jwt.Jwt
 import com.github.tg44.claymore.repository.MongoDbImpl
 import com.github.tg44.claymore.repository.measures.MeasureRepo
 import com.github.tg44.claymore.repository.users.UserRepo
-import com.github.tg44.claymore.service.{AuthService, StatisticDataService}
+import com.github.tg44.claymore.service.{AuthService, ChartService, StatisticDataService}
 import scaldi.{Injectable, Module}
 
 import scala.concurrent.Future
@@ -36,6 +36,7 @@ object Main extends App with Injectable {
 
     binding toProvider new AuthService
     binding toProvider new StatisticDataService
+    binding toProvider new ChartService
   }
 
   startApplication
