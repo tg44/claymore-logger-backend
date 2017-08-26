@@ -6,4 +6,5 @@ package object jwt {
   implicit val jsonFormats = DefaultFormats
 
   val godJwtPayload = JwtPayload("god")
+  val godJwtServicePayload = JwtServicePayload("god")
 }

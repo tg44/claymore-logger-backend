@@ -23,6 +23,7 @@ class UserRepo(implicit injector: Injector, ec: ExecutionContextExecutor) extend
   }
 
   def findUserByApiKey(apiKey: String): Future[Option[User]] = {
+    //TODO need mod
     collection.find(equal("keys.value", apiKey)).limit(2).toFuture.map(list => if (list.size == 1) Option(list.head) else None)
   }
 
@@ -34,6 +35,8 @@ class UserRepo(implicit injector: Injector, ec: ExecutionContextExecutor) extend
     val key = ApiKey(keyName, uuid, nowInUnix)
     collection.updateOne(equal("extid", extId), push("keys", key)).toFuture.map(x => if (x.getMatchedCount == 1) Option(key) else None)
   }
+
+  def importApiKey(fromExtId: String, toExtId: String, keyName: String, keySecret: String): Future[Option[Completed]] = ???
 
   def deleteApiKey(extId: String, keyValue: String): Future[Option[Completed]] = {
     collection

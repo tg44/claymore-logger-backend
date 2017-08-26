@@ -7,7 +7,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import com.github.tg44.claymore.config.Config
-import com.github.tg44.claymore.jwt.{Jwt, JwtPayload}
+import com.github.tg44.claymore.jwt.{Jwt, JwtPayload, JwtServicePayload}
 import com.github.tg44.claymore.repository.users.{ApiKey, User, UserRepo}
 import com.github.tg44.claymore.service.AuthService.{AuthResponse, AuthServiceJsonSupport, UserInfo}
 import com.google.common.cache.{Cache, CacheBuilder}
@@ -43,7 +43,7 @@ class AuthService(implicit injector: Injector, ec: ExecutionContextExecutor, sys
     userRepo.findUserByApiKey(secret).map { usr =>
       usr.fold[Resp[String]](
         Left(AuthenticationError)
-      )(user => Right(jwt.encode(JwtPayload(user.extid))))
+      )(user => Right(jwt.encode(JwtServicePayload(user.extid))))
     }
   }
 

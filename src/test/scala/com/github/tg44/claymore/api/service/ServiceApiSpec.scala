@@ -7,7 +7,7 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import com.github.tg44.claymore.config.{JwtProperties, Server}
-import com.github.tg44.claymore.jwt.{Jwt, JwtPayload}
+import com.github.tg44.claymore.jwt.{Jwt, JwtServicePayload}
 import com.github.tg44.claymore.repository.measures.{CurrencyInformation, MeasureRepo}
 import com.github.tg44.claymore.repository.users.{ApiKey, User, UserRepo}
 import org.scalatest.{Matchers, WordSpec}
@@ -47,7 +47,7 @@ class ServiceApiSpec extends WordSpec with Matchers with ScalatestRouteTest with
 
         Post("/jwt", entity) ~> serviceApi.route ~> check {
           status shouldBe OK
-          jwt.decode[JwtPayload](responseAs[String]) shouldBe a[scala.util.Success[_]]
+          jwt.decode[JwtServicePayload](responseAs[String]) shouldBe a[scala.util.Success[_]]
         }
       }
 
@@ -81,7 +81,7 @@ class ServiceApiSpec extends WordSpec with Matchers with ScalatestRouteTest with
         val measureRepo = inject[MeasureRepo]
         val jwt = inject[Jwt]
 
-        val token = jwt.encode(JwtPayload("0"))
+        val token = jwt.encode(JwtServicePayload("0"))
         val authHeader = RawHeader("Authorization", s"Bearer $token")
         val entity = HttpEntity(ContentTypes.`application/json`, statisticData.toJson.compactPrint)
 

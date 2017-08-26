@@ -68,4 +68,29 @@ class Jwt(implicit injector: Injector) extends Injectable {
     extractAuthorizationHeader
       .flatMap(validateToken)
       .flatMap(payload => validateAuthority(payload, authority))
+
+  //todo try harder with type params :)
+
+  private[this] def extractAuthorizationHeader2: Directive1[String] =
+    if (skipThis) {
+      provide("Bearer " + encode(godJwtServicePayload))
+    } else {
+      headerValueByName(JWT_HEADER_NAME)
+    }
+
+
+  private[this] def validateToken2(token: String): Directive1[JwtServicePayload] = {
+    if (token.startsWith("Bearer ")) {
+      decode[JwtServicePayload](token.split(" ")(1)) match {
+        case Success(payload) => provide(payload)
+        case Failure(_) => reject(AuthorizationFailedRejection)
+      }
+    } else {
+      reject(AuthorizationFailedRejection)
+    }
+  }
+
+  def authenticatedWithData2: Directive1[JwtServicePayload] =
+    extractAuthorizationHeader2
+      .flatMap(validateToken2)
 }

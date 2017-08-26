@@ -76,47 +76,6 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
       .toList
   }
 
-  private[service] def aggregateMeasuresByHost(measures: Seq[Measure]): Map[String, Seq[StatisticData]] = {
-    measures
-      .map(measure => measure.data.groupBy(mData => mData.endpointName))
-      .foldLeft(Map[String, Seq[StatisticData]]()) {
-        case (acc, hostDataMap) =>
-          acc ++ hostDataMap.map {
-            case (hostName, statisticDatas) =>
-              hostName -> (statisticDatas ++ acc.getOrElse(hostName, Seq.empty[StatisticData]))
-          }
-      }
-      .mapValues(dataList => dataList.sortBy(data => data.timeStamp))
-  }
-
-  private[service] def aggregateCurrenciesByTime(measures: Seq[Measure], frame: Long = 300): Map[String, Map[Long, Seq[CurrencyInformation]]] = {
-    val lower = measures.minBy(_.fromTimeStamp).fromTimeStamp
-    val measureToMax = measures.maxBy(_.toTimeStamp).toTimeStamp
-    val upper = if (measureToMax > GeneralUtil.nowInUnix) GeneralUtil.nowInUnix else measureToMax
-
-    val timestamps = GeneralUtil.generateTimeStamps(lower, upper, frame)
-
-    measures
-      .flatMap(_.data)
-      .flatMap(statData => statData.currencyInformations.map(currInfo => (currInfo.currency, statData.timeStamp, currInfo)))
-      .foldLeft(Map[String, Seq[(Long, CurrencyInformation)]]()) {
-        case (acc, (currency, ts, info)) =>
-          acc + (currency -> (acc.getOrElse(currency, Seq.empty[(Long, CurrencyInformation)]) ++ Seq((ts, info))))
-      }
-      .map {
-        case (currency, timeMeasureList) =>
-          currency -> aggregateByTime(timeMeasureList, timestamps)
-      }
-  }
-
-  private def aggregateByTime(rawData: Seq[(Long, CurrencyInformation)], timeStamps: Seq[Long]): Map[Long, Seq[CurrencyInformation]] = {
-    rawData.foldLeft(Map[Long, Seq[CurrencyInformation]]()) {
-      case (acc, element) =>
-        val convertedTs: Long = timeStamps.foldLeft(timeStamps.head)((a, c) => if (c <= element._1) c else a)
-        acc + (convertedTs -> (acc.getOrElse(convertedTs, Seq.empty[CurrencyInformation]) ++ Seq(element._2)))
-    }
-  }
-
   private def mapToSingleLineChartSeq(map: Map[String, Seq[ChartData]]) = {
     map.map { case (title, data) => SingleLineChart(data.sortBy(_.date), title) }.toList
   }
@@ -147,6 +106,49 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
       ChartData(GeneralUtil.convertTimeStampToChartString(rawData._1), rawData._2.map(_.invalidShares).sum),
       ChartData(GeneralUtil.convertTimeStampToChartString(rawData._1), rawData._2.map(_.sharesRejected).sum)
     )
+  }
+}
+
+object ChartService {
+  private[service] def aggregateCurrenciesByTime(measures: Seq[Measure], frame: Long = 300): Map[String, Map[Long, Seq[CurrencyInformation]]] = {
+    val lower = measures.minBy(_.fromTimeStamp).fromTimeStamp
+    val measureToMax = measures.maxBy(_.toTimeStamp).toTimeStamp
+    val upper = if (measureToMax > GeneralUtil.nowInUnix) GeneralUtil.nowInUnix else measureToMax
+
+    val timestamps = GeneralUtil.generateTimeStamps(lower, upper, frame)
+
+    measures
+      .flatMap(_.data)
+      .flatMap(statData => statData.currencyInformations.map(currInfo => (currInfo.currency, statData.timeStamp, currInfo)))
+      .foldLeft(Map[String, Seq[(Long, CurrencyInformation)]]()) {
+        case (acc, (currency, ts, info)) =>
+          acc + (currency -> (acc.getOrElse(currency, Seq.empty[(Long, CurrencyInformation)]) ++ Seq((ts, info))))
+      }
+      .map {
+        case (currency, timeMeasureList) =>
+          currency -> aggregateByTime(timeMeasureList, timestamps)
+      }
+  }
+
+  private[service] def aggregateMeasuresByHost(measures: Seq[Measure]): Map[String, Seq[StatisticData]] = {
+    measures
+      .map(measure => measure.data.groupBy(mData => mData.endpointName))
+      .foldLeft(Map[String, Seq[StatisticData]]()) {
+        case (acc, hostDataMap) =>
+          acc ++ hostDataMap.map {
+            case (hostName, statisticDatas) =>
+              hostName -> (statisticDatas ++ acc.getOrElse(hostName, Seq.empty[StatisticData]))
+          }
+      }
+      .mapValues(dataList => dataList.sortBy(data => data.timeStamp))
+  }
+
+  private def aggregateByTime(rawData: Seq[(Long, CurrencyInformation)], timeStamps: Seq[Long]): Map[Long, Seq[CurrencyInformation]] = {
+    rawData.foldLeft(Map[Long, Seq[CurrencyInformation]]()) {
+      case (acc, element) =>
+        val convertedTs: Long = timeStamps.foldLeft(timeStamps.head)((a, c) => if (c <= element._1) c else a)
+        acc + (convertedTs -> (acc.getOrElse(convertedTs, Seq.empty[CurrencyInformation]) ++ Seq(element._2)))
+    }
   }
 }
 

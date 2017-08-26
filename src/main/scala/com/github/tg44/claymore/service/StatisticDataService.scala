@@ -12,7 +12,6 @@ class StatisticDataService(implicit injector: Injector, ec: ExecutionContextExec
 
   val measureRepo = inject[MeasureRepo]
   val config = inject[Config]
-  val chartService = inject[ChartService]
 
   def saveData(extId: String, statData: StatisticDataDto): FResp[Long] = {
     val time = GeneralUtil.nowInUnix
@@ -41,8 +40,8 @@ class StatisticDataService(implicit injector: Injector, ec: ExecutionContextExec
   }
 
   private def computeLatestDataLists(measures: Seq[Measure]): StatisticDataWrapper = {
-    val aggregatedMeasuresByHost: Map[String, Seq[StatisticData]] = chartService.aggregateMeasuresByHost(measures)
-    val aggregatedCurrenciesByTime: Map[String, Map[Long, Seq[CurrencyInformation]]] = chartService.aggregateCurrenciesByTime(measures)
+    val aggregatedMeasuresByHost: Map[String, Seq[StatisticData]] = ChartService.aggregateMeasuresByHost(measures)
+    val aggregatedCurrenciesByTime: Map[String, Map[Long, Seq[CurrencyInformation]]] = ChartService.aggregateCurrenciesByTime(measures)
 
     val latestDataPerHost: Map[String, StatisticData] = aggregatedMeasuresByHost.mapValues(_.maxBy(_.timeStamp))
     val summarizedDataByCurrencies: Map[String, List[(Long, CurrencyInformation, Int)]] = aggregatedCurrenciesByTime

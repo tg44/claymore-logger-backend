@@ -32,6 +32,7 @@ limit the apikey-s number for mongo security reasons
 refactor the public/private things in general
 use scapegoat
 db cleanup actor
+jwt 'service' to a more generic and cleaner format
 
 
 //done

@@ -7,7 +7,7 @@ object Measure {
     Measure(new ObjectId(), userExtId, fromTimeStamp, toTimeStamp, data)
   }
 }
-
+//todo apikey instead of extid
 case class Measure(_id: ObjectId, userExtId: String, fromTimeStamp: Long, toTimeStamp: Long, data: Seq[StatisticData])
 
 case class StatisticData(

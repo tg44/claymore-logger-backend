@@ -17,11 +17,12 @@ class MeasureRepo(implicit injector: Injector, ec: ExecutionContextExecutor) ext
 
   val collection: MongoCollection[Measure] = mongoDb.database.getCollection[Measure](config.MONGO.measureCollection)
 
+  //todo apikez seq instead of extid
   def getMesuresInRange(userExtId: String, from: Long, to: Long): Future[Seq[Measure]] = {
     require(from <= to)
     collection.find(and(equal("userExtId", userExtId), and(lte("fromTimeStamp", to), gte("toTimeStamp", from)))).toFuture
   }
-
+  //todo apikey inst of extid
   def saveNewMeasure(userExtId: String, data: StatisticData, period: (Long, Long)): Future[Completed] = {
     require(period._1 <= period._2)
     require(data.timeStamp >= period._1 && data.timeStamp <= period._2)

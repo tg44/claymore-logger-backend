@@ -9,4 +9,4 @@ object User {
 }
 
 case class User(_id: ObjectId, extid: String, email: String, keys: Seq[ApiKey])
-case class ApiKey(name: String, value: String, createdAt: Long)
+case class ApiKey(name: String, value: String, createdAt: Long) //todo originator
