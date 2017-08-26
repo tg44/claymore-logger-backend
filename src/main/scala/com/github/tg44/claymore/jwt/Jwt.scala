@@ -78,7 +78,6 @@ class Jwt(implicit injector: Injector) extends Injectable {
       headerValueByName(JWT_HEADER_NAME)
     }
 
-
   private[this] def validateToken2(token: String): Directive1[JwtServicePayload] = {
     if (token.startsWith("Bearer ")) {
       decode[JwtServicePayload](token.split(" ")(1)) match {

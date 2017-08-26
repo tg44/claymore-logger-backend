@@ -1,5 +1,7 @@
 package com.github.tg44.claymore.utils
 
+import java.util.logging.{Level, Logger}
+
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.github.simplyscala.MongoEmbedDatabase
@@ -26,6 +28,10 @@ object AppFixture extends MongoEmbedDatabase {
     val mongodProps = mongoStart(port)
     val mongoConfig = MongoConfig(s"mongodb://localhost:$port", "test", "users", "measures")
     implicit val modules = new TestModule(serverConfig, mongoConfig, clientConfig)
+
+    val mongoLogger = Logger.getLogger("org.mongodb.driver")
+    mongoLogger.setLevel(Level.SEVERE)
+
     try { block(modules) } finally { Option(mongodProps).foreach(mongoStop) }
   }
 

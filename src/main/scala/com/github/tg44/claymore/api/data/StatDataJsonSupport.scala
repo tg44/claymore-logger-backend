@@ -6,7 +6,6 @@ import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 trait StatDataJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 
-
   implicit val currencyInformationJsonFormatter: RootJsonFormat[CurrencyInformation] = jsonFormat8(CurrencyInformation)
   implicit val cardStatisticsJsonFormatter: RootJsonFormat[CardStatistic] = jsonFormat3(CardStatistic)
   implicit val statDataJsonFormatter: RootJsonFormat[StatisticData] = jsonFormat10(StatisticData)

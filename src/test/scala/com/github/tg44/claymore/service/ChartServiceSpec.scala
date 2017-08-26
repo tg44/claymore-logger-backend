@@ -44,7 +44,7 @@ class ChartServiceSpec extends WordSpecLike with Matchers with MockitoSugar {
     )
 
     "aggregate measures by host correctly" in {
-      val aggregated = service.aggregateMeasuresByHost(measures)
+      val aggregated = ChartService.aggregateMeasuresByHost(measures)
       aggregated.size shouldBe 4
       aggregated("a").size shouldBe 4
       aggregated("b").size shouldBe 2
@@ -53,7 +53,7 @@ class ChartServiceSpec extends WordSpecLike with Matchers with MockitoSugar {
     }
 
     "aggregate measures by currencies and time correctly" in {
-      val aggregated = service.aggregateCurrenciesByTime(measures, 2)
+      val aggregated = ChartService.aggregateCurrenciesByTime(measures, 2)
       aggregated.size shouldBe 1
       aggregated("eth").size shouldBe 6
       aggregated("eth")(0).size shouldBe 1
@@ -61,7 +61,7 @@ class ChartServiceSpec extends WordSpecLike with Matchers with MockitoSugar {
     }
 
     "compute avgTemp per host correctly" in {
-      val aggregated = service.aggregateMeasuresByHost(measures)
+      val aggregated = ChartService.aggregateMeasuresByHost(measures)
       val chart = service.computeAvgTempPerHost(aggregated)
 
       chart.title shouldBe "avgTemp"
@@ -81,14 +81,14 @@ class ChartServiceSpec extends WordSpecLike with Matchers with MockitoSugar {
     }
 
     "compute hash rate per currencie correctly" in {
-      val aggregated = service.aggregateCurrenciesByTime(measures, 2)
+      val aggregated = ChartService.aggregateCurrenciesByTime(measures, 2)
       val chart = service.computeHashratePerCurrencie(aggregated)
 
       chart.head.data.map(_.value) shouldBe Seq(0.5, 1, 0.5, 0.5, 1, 0.5)
     }
 
     "compute shares per currencie correctly" in {
-      val aggregated = service.aggregateCurrenciesByTime(measures, 2)
+      val aggregated = ChartService.aggregateCurrenciesByTime(measures, 2)
       val chart = service.computeSharesPerCurrencie(aggregated)
 
       chart(0).data(0).map(_.value) shouldBe Seq(3, 6, 3, 3, 6, 3)
@@ -97,7 +97,7 @@ class ChartServiceSpec extends WordSpecLike with Matchers with MockitoSugar {
     }
 
     "compute temp per host per card correctly" in {
-      val aggregated = service.aggregateMeasuresByHost(measures)
+      val aggregated = ChartService.aggregateMeasuresByHost(measures)
       val chart = service.computeTempPerHostPerCard(aggregated)
 
       println(chart)
@@ -107,7 +107,7 @@ class ChartServiceSpec extends WordSpecLike with Matchers with MockitoSugar {
     }
 
     "compute fan per host per card correctly" in {
-      val aggregated = service.aggregateMeasuresByHost(measures)
+      val aggregated = ChartService.aggregateMeasuresByHost(measures)
       val chart = service.computeFanPerHostPerCard(aggregated)
 
       println(chart)

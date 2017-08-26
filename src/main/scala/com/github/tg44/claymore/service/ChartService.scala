@@ -15,8 +15,8 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
   }
 
   private def computeChartsData(measures: Seq[Measure]) = {
-    val aggregatedMeasuresByHost = aggregateMeasuresByHost(measures)
-    val aggregatedCurrenciesByTime = aggregateCurrenciesByTime(measures)
+    val aggregatedMeasuresByHost = ChartService.aggregateMeasuresByHost(measures)
+    val aggregatedCurrenciesByTime = ChartService.aggregateCurrenciesByTime(measures)
     Charts(
       computeAvgTempPerHost(aggregatedMeasuresByHost),
       computeHashratePerCurrencie(aggregatedCurrenciesByTime),
