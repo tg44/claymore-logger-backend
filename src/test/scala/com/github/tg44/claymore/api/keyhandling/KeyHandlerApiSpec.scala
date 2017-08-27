@@ -67,6 +67,85 @@ class KeyHandlerApiSpec extends WordSpec with Matchers with ScalatestRouteTest w
         }
       }
     }
+    "import endpoint" must {
+      "need authentication" in withMongoDb() { module =>
+        import module._
+        val keyApi = inject[KeyHandlerApi]
+        val entity = HttpEntity(ContentTypes.`application/json`, """{"fromUser": "test", "keyName": "test", "keySecret": "secret"}""")
+
+        Post("/import", entity) ~> keyApi.route ~> check {
+          rejection shouldBe MissingHeaderRejection("Authorization")
+        }
+      }
+
+      "return 400 if no user saved" in withMongoDb() { module =>
+        import module._
+        val keyApi = inject[KeyHandlerApi]
+        val jwt = inject[Jwt]
+
+        val token = jwt.encode(JwtPayload("0"))
+        val authHeader = RawHeader("Authorization", s"Bearer $token")
+        val entity = HttpEntity(ContentTypes.`application/json`, """{"fromUser": "test", "keyName": "test", "keySecret": "secret"}""")
+
+        Post("/import", entity) ~> addHeader(authHeader) ~> keyApi.route ~> check {
+          status shouldBe BadRequest
+        }
+      }
+
+      "return 400 if bad from user" in withMongoDb() { module =>
+        import module._
+        val keyApi = inject[KeyHandlerApi]
+        val jwt = inject[Jwt]
+        val userRepo = inject[UserRepo]
+
+        val token = jwt.encode(JwtPayload(user1.extid))
+        val authHeader = RawHeader("Authorization", s"Bearer $token")
+        val entity = HttpEntity(ContentTypes.`application/json`, """{"fromUser": "test", "keyName": "test", "keySecret": "secret"}""")
+
+        Await.result(userRepo.collection.insertOne(user1).toFuture, dbTimeout)
+
+        Post("/import", entity) ~> addHeader(authHeader) ~> keyApi.route ~> check {
+          status shouldBe BadRequest
+        }
+      }
+
+      "return 400 if bad key" in withMongoDb() { module =>
+        import module._
+        val keyApi = inject[KeyHandlerApi]
+        val jwt = inject[Jwt]
+        val userRepo = inject[UserRepo]
+
+        val token = jwt.encode(JwtPayload(user1.extid))
+        val authHeader = RawHeader("Authorization", s"Bearer $token")
+        val entity = HttpEntity(ContentTypes.`application/json`, s"""{"fromUser": "${user2.extid}", "keyName": "test", "keySecret": "secret"}""")
+
+        Await.result(userRepo.collection.insertOne(user1).toFuture, dbTimeout)
+
+        Post("/import", entity) ~> addHeader(authHeader) ~> keyApi.route ~> check {
+          status shouldBe BadRequest
+        }
+      }
+
+      "import new key correctly" in withMongoDb() { module =>
+        import module._
+        val keyApi = inject[KeyHandlerApi]
+        val jwt = inject[Jwt]
+        val userRepo = inject[UserRepo]
+
+        val token = jwt.encode(JwtPayload(user1.extid))
+        val authHeader = RawHeader("Authorization", s"Bearer $token")
+        val entity = HttpEntity(ContentTypes.`application/json`, s"""{"fromUser": "${user2.extid}", "keyName": "1", "keySecret": "1"}""")
+
+        Await.result(userRepo.collection.insertOne(user1).toFuture, dbTimeout)
+        Await.result(userRepo.collection.insertOne(user2).toFuture, dbTimeout)
+
+        Post("/import", entity) ~> addHeader(authHeader) ~> keyApi.route ~> check {
+          status shouldBe OK
+          val user = Await.result(userRepo.findUserByExtId(user1.extid), dbTimeout)
+          user should matchPattern { case Some(User(_, "testId1", "test1@email.com", Seq(ApiKey("1", "1", "testId2", _)))) => }
+        }
+      }
+    }
     "load endpoint" must {
       "need authentication" in withMongoDb() { module =>
         import module._

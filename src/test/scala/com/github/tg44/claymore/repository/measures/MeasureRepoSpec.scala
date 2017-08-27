@@ -38,7 +38,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
       val ci = CurrencyInformation("eth", 0.0, 1, 1, 1, 1, Nil, "")
       StatisticData(time, "", "", 1, "", 1.0, Seq(ci), Nil, Nil, Nil)
     }
-//todo tests with more than one seq element
+
     "getMesuresInRange" must {
 
       "throw exception to bad input parameters" in withMongoDb() { module =>
@@ -95,6 +95,13 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         result.size shouldBe 1
       }
 
+      "give back all document for the requested user" in withMongoDb() { module =>
+        import module._
+        val measureRepo = inject[MeasureRepo]
+        insertTestDataset(measureRepo)
+        val result = Await.result(measureRepo.getMesuresInRange(Seq("testKey", "testKey2"), 150, 170), dbTimeout)
+        result.size shouldBe 2
+      }
     }
 
     "saveNewMeasure" must {

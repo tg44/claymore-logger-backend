@@ -26,6 +26,10 @@ class UserRepo(implicit injector: Injector, ec: ExecutionContextExecutor) extend
     collection.find(equal("keys.value", apiKey)).limit(1).toFuture.map(list => if (list.size == 1) list.head.keys.find(key => key.value == apiKey) else None)
   }
 
+  private def checkUserWithKey(extId: String, apiKey: String): Future[Boolean] = {
+    collection.find(and(equal("keys.value", apiKey), equal("extid", extId))).limit(1).toFuture().map(_.size == 1)
+  }
+
   def insertNewUser(usr: User): Future[Completed] = {
     collection.insertOne(usr).toFuture
   }
@@ -34,10 +38,15 @@ class UserRepo(implicit injector: Injector, ec: ExecutionContextExecutor) extend
     val key = ApiKey(keyName, uuid, extId, nowInUnix)
     collection.updateOne(equal("extid", extId), push("keys", key)).toFuture.map(x => if (x.getMatchedCount == 1) Option(key) else None)
   }
-  //todo need test, import only if exist
+
   def importApiKey(fromExtId: String, toExtId: String, keyName: String, keySecret: String): Future[Option[Completed]] = {
     val key = ApiKey(keyName, keySecret, fromExtId, nowInUnix)
-    collection.updateOne(equal("extid", toExtId), push("keys", key)).toFuture.map(x => if (x.getMatchedCount == 1) Option(Completed()) else None)
+    checkUserWithKey(fromExtId, keySecret).flatMap { exist =>
+      if (exist)
+        collection.updateOne(equal("extid", toExtId), push("keys", key)).toFuture.map(x => if (x.getMatchedCount == 1) Option(Completed()) else None)
+      else
+        Future.successful(None)
+    }
   }
 
   //todo need to handle if the extid is the creator
