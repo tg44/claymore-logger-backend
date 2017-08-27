@@ -42,7 +42,7 @@ class ServiceApiSpec extends WordSpec with Matchers with ScalatestRouteTest with
         val userRepo = inject[UserRepo]
         val jwt = inject[Jwt]
 
-        Await.result(userRepo.insertNewUser(User("1", "asd@asd.asd", Seq(ApiKey("test", "secret", 0)))), dbTimeout)
+        Await.result(userRepo.insertNewUser(User("1", "asd@asd.asd", Seq(ApiKey("test", "secret", "1", 0)))), dbTimeout)
         val entity = HttpEntity(ContentTypes.`application/json`, """{"secret": "secret"}""")
 
         Post("/jwt", entity) ~> serviceApi.route ~> check {

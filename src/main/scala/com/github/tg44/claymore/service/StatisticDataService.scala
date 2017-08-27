@@ -3,14 +3,16 @@ package com.github.tg44.claymore.service
 import com.github.tg44.claymore.api.service.StatisticDataDto
 import com.github.tg44.claymore.config.Config
 import com.github.tg44.claymore.repository.measures.{CurrencyInformation, Measure, MeasureRepo, StatisticData}
+import com.github.tg44.claymore.repository.users.UserRepo
 import com.github.tg44.claymore.utils.GeneralUtil
 import scaldi.{Injectable, Injector}
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{ExecutionContextExecutor, Future}
 
 class StatisticDataService(implicit injector: Injector, ec: ExecutionContextExecutor) extends Injectable {
 
   val measureRepo = inject[MeasureRepo]
+  val userRepo = inject[UserRepo]
   val config = inject[Config]
 
   def saveData(extId: String, statData: StatisticDataDto): FResp[Long] = {
@@ -36,7 +38,11 @@ class StatisticDataService(implicit injector: Injector, ec: ExecutionContextExec
   }
 
   def getLastMeasures(extId: String, from: Long, to: Long): FResp[StatisticDataWrapper] = {
-    measureRepo.getMesuresInRange(extId, from, to).map(measures => Right(computeLatestDataLists(measures)))
+    userRepo.findUserByExtId(extId).flatMap {
+      case Some(user) =>
+        measureRepo.getMesuresInRange(user.keys.map(_.value), from, to).map(measures => Right(computeLatestDataLists(measures)))
+      case None => Future.successful(Left(NoEntityFound))
+    }
   }
 
   private def computeLatestDataLists(measures: Seq[Measure]): StatisticDataWrapper = {

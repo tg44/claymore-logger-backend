@@ -18,7 +18,7 @@ class KeyHandlerApiSpec extends WordSpec with Matchers with ScalatestRouteTest w
   "KeyHandlerApi" must {
 
     val user1 = User("testId1", "test1@email.com", Nil)
-    val user2 = User("testId2", "test2@email.com", Seq(ApiKey("1", "1", 1), ApiKey("2", "2", 2), ApiKey("3", "3", 3)))
+    val user2 = User("testId2", "test2@email.com", Seq(ApiKey("1", "1", "testId2", 1), ApiKey("2", "2", "testId2", 2), ApiKey("3", "3", "testId2", 3)))
 
     "insert endpoint" must {
 
@@ -61,9 +61,9 @@ class KeyHandlerApiSpec extends WordSpec with Matchers with ScalatestRouteTest w
 
         Post("/insert", entity) ~> addHeader(authHeader) ~> keyApi.route ~> check {
           status shouldBe OK
-          responseAs[ApiKey] should matchPattern { case ApiKey("test", _, _) => }
+          responseAs[ApiKey] should matchPattern { case ApiKey("test", _, _, _) => }
           val user = Await.result(userRepo.findUserByExtId(user1.extid), dbTimeout)
-          user should matchPattern { case Some(User(_, "testId1", "test1@email.com", Seq(ApiKey("test", _, _)))) => }
+          user should matchPattern { case Some(User(_, "testId1", "test1@email.com", Seq(ApiKey("test", _, _, _)))) => }
         }
       }
     }

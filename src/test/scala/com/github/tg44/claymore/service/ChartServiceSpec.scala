@@ -2,6 +2,7 @@ package com.github.tg44.claymore.service
 
 import akka.actor.ActorSystem
 import com.github.tg44.claymore.repository.measures._
+import com.github.tg44.claymore.repository.users.UserRepo
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Matchers, WordSpecLike}
 import scaldi.Module
@@ -13,6 +14,7 @@ class ChartServiceSpec extends WordSpecLike with Matchers with MockitoSugar {
   "ChartService" must {
     implicit val testModule = new Module {
       bind[MeasureRepo] to mock[MeasureRepo]
+      bind[UserRepo] to mock[UserRepo]
     }
     val service = new ChartService()
 
@@ -100,7 +102,6 @@ class ChartServiceSpec extends WordSpecLike with Matchers with MockitoSugar {
       val aggregated = ChartService.aggregateMeasuresByHost(measures)
       val chart = service.computeTempPerHostPerCard(aggregated)
 
-      println(chart)
       val bData = chart.find(_.title.startsWith("b")).get
       bData.data(0).map(_.value) shouldBe Seq(1, 1)
       bData.data(1).map(_.value) shouldBe Seq(3)
@@ -110,7 +111,6 @@ class ChartServiceSpec extends WordSpecLike with Matchers with MockitoSugar {
       val aggregated = ChartService.aggregateMeasuresByHost(measures)
       val chart = service.computeFanPerHostPerCard(aggregated)
 
-      println(chart)
       val bData = chart.find(_.title.startsWith("b")).get
       bData.data(0).map(_.value) shouldBe Seq(50, 60)
       bData.data(1).map(_.value) shouldBe Seq(70)

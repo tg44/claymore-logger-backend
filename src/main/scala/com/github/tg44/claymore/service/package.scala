@@ -11,4 +11,5 @@ package object service {
 
   abstract class ErrorResponse()
   case object AuthenticationError extends ErrorResponse
+  case object NoEntityFound extends ErrorResponse
 }

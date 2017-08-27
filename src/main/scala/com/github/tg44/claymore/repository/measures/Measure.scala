@@ -3,12 +3,12 @@ package com.github.tg44.claymore.repository.measures
 import org.mongodb.scala.bson.ObjectId
 
 object Measure {
-  def apply(userExtId: String, fromTimeStamp: Long, toTimeStamp: Long, data: Seq[StatisticData]): Measure = {
-    Measure(new ObjectId(), userExtId, fromTimeStamp, toTimeStamp, data)
+  def apply(apiKey: String, fromTimeStamp: Long, toTimeStamp: Long, data: Seq[StatisticData]): Measure = {
+    Measure(new ObjectId(), apiKey, fromTimeStamp, toTimeStamp, data)
   }
 }
-//todo apikey instead of extid
-case class Measure(_id: ObjectId, userExtId: String, fromTimeStamp: Long, toTimeStamp: Long, data: Seq[StatisticData])
+
+case class Measure(_id: ObjectId, apiKey: String, fromTimeStamp: Long, toTimeStamp: Long, data: Seq[StatisticData])
 
 case class StatisticData(
     timeStamp: Long,

@@ -1,10 +1,36 @@
 //short term
 statistical data output api - need test
-refactor the api keys and measures and make them shareable between users
+resolve the need more test / refactor todos
+
+//mid term
+webUI - apikey features
+webUI - chart features
+webUI - data features
+
+//nice to have
+use the exp in the jwt
+ratelimit the jwt requester api
+limit the apikey-s number for mongo security reasons
+refactor the public/private things in general
+use scapegoat
+db cleanup actor
+jwt 'service' to a more generic and cleaner format
+maybe 2 key usage instead of one in services
+
+
+//done
+app structure
+optional jwt usage with tests
+di
+repository layer with tests
+service secret key acquiring
+google auth working
+chart data apis
+api keys shareable between users
 
 
 
-//stat data graphs
+//stat data charts
 linechart - avgtemp/host
 - per currency
     linechart - sum hashrate
@@ -17,29 +43,3 @@ linechart - avgtemp/host
 list hosts and currencies
 - per host - last measured data in a human readable format
 - per currencies - last measures aggregated to all hosts show only currency informations
-
-
-
-
-//mid term
-webUI - apikey features
-webUI - chart features
-
-//nice to have
-use the exp in the jwt
-ratelimit the jwt requester api
-limit the apikey-s number for mongo security reasons
-refactor the public/private things in general
-use scapegoat
-db cleanup actor
-jwt 'service' to a more generic and cleaner format
-
-
-//done
-app structure
-optional jwt usage with tests
-di
-repository layer with tests
-service secret key acquiring
-google auth working
-chart data apis

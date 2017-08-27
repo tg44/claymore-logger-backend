@@ -20,8 +20,8 @@ class UserRepoSpec extends WordSpecLike with Matchers with Injectable {
 
   "UserRepo" must {
 
-    val testKey1 = ApiKey("testkey1", "key1", 0)
-    val testKey2 = ApiKey("testkey2", "key2", 0)
+    val testKey1 = ApiKey("testkey1", "key1", "testId1", 0)
+    val testKey2 = ApiKey("testkey2", "key2", "testId1", 0)
     val user1 = User("testId1", "test1@email.com", Nil)
     val user1Duplicated = User("testId1", "test1@email.com", Nil)
     val user2 = User("testId2", "test2@email.com", Nil)
@@ -70,38 +70,29 @@ class UserRepoSpec extends WordSpecLike with Matchers with Injectable {
       }
     }
 
-    "find user by apiKey" must {
+    "find key by secret" must {
 
       "if it exists" in withMongoDb() { module =>
         import module._
         val userRepo = inject[UserRepo]
         Await.result(userRepo.collection.insertOne(user1With1Key).toFuture, dbTimeout)
         Await.result(userRepo.collection.insertOne(user2With1Key).toFuture, dbTimeout)
-        val result = Await.result(userRepo.findUserByApiKey("key1"), dbTimeout)
-        result should matchPattern { case Some(User(_, "testId1", "test1@email.com", _)) => }
+        val result = Await.result(userRepo.findKeyBySecret("key1"), dbTimeout)
+        result shouldBe Some(testKey1)
       }
 
       "if has multiple" in withMongoDb() { module =>
         import module._
         val userRepo = inject[UserRepo]
         Await.result(userRepo.collection.insertOne(user1With2Key).toFuture, dbTimeout)
-        val result = Await.result(userRepo.findUserByApiKey("key2"), dbTimeout)
-        result should matchPattern { case Some(User(_, "testId1", "test1@email.com", _)) => }
-      }
-
-      "if somehow multiple exists" in withMongoDb() { module =>
-        import module._
-        val userRepo = inject[UserRepo]
-        Await.result(userRepo.collection.insertOne(user1With1Key).toFuture, dbTimeout)
-        Await.result(userRepo.collection.insertOne(user2WithDuplicatedKey).toFuture, dbTimeout)
-        val result = Await.result(userRepo.findUserByApiKey("key1"), dbTimeout)
-        result shouldBe None
+        val result = Await.result(userRepo.findKeyBySecret("key2"), dbTimeout)
+        result shouldBe Some(testKey2)
       }
 
       "if none exist" in withMongoDb() { module =>
         import module._
         val userRepo = inject[UserRepo]
-        val result = Await.result(userRepo.findUserByApiKey("key1"), dbTimeout)
+        val result = Await.result(userRepo.findKeyBySecret("key1"), dbTimeout)
         result shouldBe None
       }
     }
@@ -115,9 +106,9 @@ class UserRepoSpec extends WordSpecLike with Matchers with Injectable {
         Await.result(userRepo.collection.insertOne(user1).toFuture, dbTimeout)
         Await.result(userRepo.collection.insertOne(user2).toFuture, dbTimeout)
         val result = Await.result(userRepo.generateNewApiKeyToUser("testId1", "key1"), dbTimeout)
-        result should matchPattern { case Some(ApiKey("key1", _, z)) if z >= time => }
+        result should matchPattern { case Some(ApiKey("key1", _, _, z)) if z >= time => }
         val user = Await.result(userRepo.findUserByExtId("testId1"), dbTimeout)
-        user should matchPattern { case Some(User(_, "testId1", "test1@email.com", Seq(ApiKey("key1", _, _)))) => }
+        user should matchPattern { case Some(User(_, "testId1", "test1@email.com", Seq(ApiKey("key1", _, _, _)))) => }
       }
 
       "if user not exist" in withMongoDb() { module =>
@@ -133,7 +124,7 @@ class UserRepoSpec extends WordSpecLike with Matchers with Injectable {
         val time = GeneralUtil.nowInUnix
         Await.result(userRepo.collection.insertOne(user1With2Key).toFuture, dbTimeout)
         val result = Await.result(userRepo.generateNewApiKeyToUser("testId1", "key1"), dbTimeout)
-        result should matchPattern { case Some(ApiKey("key1", _, z)) if z >= time => }
+        result should matchPattern { case Some(ApiKey("key1", _, _, z)) if z >= time => }
         val user = Await.result(userRepo.findUserByExtId("testId1"), dbTimeout)
         user should matchPattern { case Some(User(_, "testId1", "test1@email.com", seq)) if seq.size == 3 => }
       }

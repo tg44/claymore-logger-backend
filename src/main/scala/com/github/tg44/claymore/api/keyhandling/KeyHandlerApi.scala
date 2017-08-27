@@ -25,6 +25,16 @@ class KeyHandlerApi(implicit injector: Injector) extends Injectable with KeysJso
         }
       }
     } ~
+    path("import") {
+      authenticatedWithData { jwtData =>
+        (post & entity(as[ImportKey])) { importKeyDao =>
+          onSuccess(authService.importNewApiKey(jwtData.userId, importKeyDao.fromUser, importKeyDao.keyName, importKeyDao.keySecret)) {
+            case Right(response) => complete(OK)
+            case Left(_) => complete(HttpResponse(BadRequest))
+          }
+        }
+      }
+    } ~
     path("load") {
       authenticatedWithData { jwtData =>
         get {

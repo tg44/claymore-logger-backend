@@ -1,17 +1,23 @@
 package com.github.tg44.claymore.service
 
 import com.github.tg44.claymore.repository.measures.{CurrencyInformation, Measure, MeasureRepo, StatisticData}
+import com.github.tg44.claymore.repository.users.UserRepo
 import com.github.tg44.claymore.utils.GeneralUtil
 import scaldi.{Injectable, Injector}
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{ExecutionContextExecutor, Future}
 
 class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) extends Injectable {
 
   val measureRepo = inject[MeasureRepo]
+  val userRepo = inject[UserRepo]
 
   def getCharts(extId: String, from: Long, to: Long): FResp[Charts] = {
-    measureRepo.getMesuresInRange(extId, from, to).map(measures => Right(computeChartsData(measures)))
+    userRepo.findUserByExtId(extId).flatMap {
+      case Some(user) =>
+        measureRepo.getMesuresInRange(user.keys.map(_.value), from, to).map(measures => Right(computeChartsData(measures)))
+      case None => Future.successful(Left(NoEntityFound))
+    }
   }
 
   private def computeChartsData(measures: Seq[Measure]) = {

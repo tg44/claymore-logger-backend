@@ -17,20 +17,19 @@ class MeasureRepo(implicit injector: Injector, ec: ExecutionContextExecutor) ext
 
   val collection: MongoCollection[Measure] = mongoDb.database.getCollection[Measure](config.MONGO.measureCollection)
 
-  //todo apikez seq instead of extid
-  def getMesuresInRange(userExtId: String, from: Long, to: Long): Future[Seq[Measure]] = {
+  def getMesuresInRange(apiKeys: Seq[String], from: Long, to: Long): Future[Seq[Measure]] = {
     require(from <= to)
-    collection.find(and(equal("userExtId", userExtId), and(lte("fromTimeStamp", to), gte("toTimeStamp", from)))).toFuture
+    collection.find(and(in("apiKey", apiKeys: _*), and(lte("fromTimeStamp", to), gte("toTimeStamp", from)))).toFuture
   }
-  //todo apikey inst of extid
-  def saveNewMeasure(userExtId: String, data: StatisticData, period: (Long, Long)): Future[Completed] = {
+
+  def saveNewMeasure(apiKey: String, data: StatisticData, period: (Long, Long)): Future[Completed] = {
     require(period._1 <= period._2)
     require(data.timeStamp >= period._1 && data.timeStamp <= period._2)
-    getMesuresInRange(userExtId, period._1, period._2).flatMap { list =>
+    getMesuresInRange(Seq(apiKey), period._1, period._2).flatMap { list =>
       if (list.size == 1) {
         collection.updateOne(equal("_id", list.head._id), push("data", data)).toFuture.map(_ => Completed())
       } else if (list.isEmpty) {
-        val measure = Measure(userExtId, period._1, period._2, Seq(data))
+        val measure = Measure(apiKey, period._1, period._2, Seq(data))
         collection.insertOne(measure).toFuture
       } else {
         throw new InvalidParameterException("the given period is matching more then one existing document")

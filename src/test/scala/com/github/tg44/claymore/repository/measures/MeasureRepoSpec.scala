@@ -23,10 +23,10 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         measureRepo.collection
           .insertMany(
             Seq(
-              Measure("testExtId", 101, 200, Nil),
-              Measure("testExtId", 201, 300, Nil),
-              Measure("testExtId", 401, 500, Nil),
-              Measure("testExtId2", 101, 200, Nil)
+              Measure("testKey", 101, 200, Nil),
+              Measure("testKey", 201, 300, Nil),
+              Measure("testKey", 401, 500, Nil),
+              Measure("testKey2", 101, 200, Nil)
             )
           )
           .toFuture,
@@ -38,20 +38,20 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
       val ci = CurrencyInformation("eth", 0.0, 1, 1, 1, 1, Nil, "")
       StatisticData(time, "", "", 1, "", 1.0, Seq(ci), Nil, Nil, Nil)
     }
-
+//todo tests with more than one seq element
     "getMesuresInRange" must {
 
       "throw exception to bad input parameters" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
-        an[IllegalArgumentException] should be thrownBy Await.result(measureRepo.getMesuresInRange("testExtId", 500, 100), dbTimeout)
+        an[IllegalArgumentException] should be thrownBy Await.result(measureRepo.getMesuresInRange(Seq("testKey"), 500, 100), dbTimeout)
       }
 
       "return nothing if no matching document" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        val result = Await.result(measureRepo.getMesuresInRange("testExtId", 305, 370), dbTimeout)
+        val result = Await.result(measureRepo.getMesuresInRange(Seq("testKey"), 305, 370), dbTimeout)
         result.size shouldBe 0
       }
 
@@ -59,7 +59,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        val result = Await.result(measureRepo.getMesuresInRange("testExtId", 420, 470), dbTimeout)
+        val result = Await.result(measureRepo.getMesuresInRange(Seq("testKey"), 420, 470), dbTimeout)
         result.size shouldBe 1
       }
 
@@ -67,7 +67,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        val result = Await.result(measureRepo.getMesuresInRange("testExtId", 320, 470), dbTimeout)
+        val result = Await.result(measureRepo.getMesuresInRange(Seq("testKey"), 320, 470), dbTimeout)
         result.size shouldBe 1
       }
 
@@ -75,7 +75,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        val result = Await.result(measureRepo.getMesuresInRange("testExtId", 220, 320), dbTimeout)
+        val result = Await.result(measureRepo.getMesuresInRange(Seq("testKey"), 220, 320), dbTimeout)
         result.size shouldBe 1
       }
 
@@ -83,7 +83,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        val result = Await.result(measureRepo.getMesuresInRange("testExtId", 150, 450), dbTimeout)
+        val result = Await.result(measureRepo.getMesuresInRange(Seq("testKey"), 150, 450), dbTimeout)
         result.size shouldBe 3
       }
 
@@ -91,7 +91,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        val result = Await.result(measureRepo.getMesuresInRange("testExtId", 150, 170), dbTimeout)
+        val result = Await.result(measureRepo.getMesuresInRange(Seq("testKey"), 150, 170), dbTimeout)
         result.size shouldBe 1
       }
 
@@ -102,27 +102,27 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
       "throw exception to bad period parameters" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
-        an[IllegalArgumentException] should be thrownBy Await.result(measureRepo.saveNewMeasure("testExtId", createStatisticData(100), (500, 100)), dbTimeout)
+        an[IllegalArgumentException] should be thrownBy Await.result(measureRepo.saveNewMeasure("testKey", createStatisticData(100), (500, 100)), dbTimeout)
       }
 
       "throw exception to bad data timestamp parameters" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
-        an[IllegalArgumentException] should be thrownBy Await.result(measureRepo.saveNewMeasure("testExtId", createStatisticData(100), (300, 400)), dbTimeout)
+        an[IllegalArgumentException] should be thrownBy Await.result(measureRepo.saveNewMeasure("testKey", createStatisticData(100), (300, 400)), dbTimeout)
       }
 
       "throw exception to bad number of documents given back from period" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        an[InvalidParameterException] should be thrownBy Await.result(measureRepo.saveNewMeasure("testExtId", createStatisticData(100), (100, 500)), dbTimeout)
+        an[InvalidParameterException] should be thrownBy Await.result(measureRepo.saveNewMeasure("testKey", createStatisticData(100), (100, 500)), dbTimeout)
       }
 
       "create new document if needed" in withMongoDb() { module =>
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        Await.result(measureRepo.saveNewMeasure("testExtId", createStatisticData(351), (350, 370)), dbTimeout)
+        Await.result(measureRepo.saveNewMeasure("testKey", createStatisticData(351), (350, 370)), dbTimeout)
         Await.result(measureRepo.collection.count().toFuture, dbTimeout) shouldBe 5
       }
 
@@ -130,7 +130,7 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        Await.result(measureRepo.saveNewMeasure("testExtId100", createStatisticData(351), (350, 370)), dbTimeout)
+        Await.result(measureRepo.saveNewMeasure("testKey100", createStatisticData(351), (350, 370)), dbTimeout)
         Await.result(measureRepo.collection.count().toFuture, dbTimeout) shouldBe 5
       }
 
@@ -138,9 +138,9 @@ class MeasureRepoSpec extends WordSpecLike with Matchers with Injectable {
         import module._
         val measureRepo = inject[MeasureRepo]
         insertTestDataset(measureRepo)
-        Await.result(measureRepo.saveNewMeasure("testExtId", createStatisticData(130), (120, 140)), dbTimeout)
+        Await.result(measureRepo.saveNewMeasure("testKey", createStatisticData(130), (120, 140)), dbTimeout)
         Await.result(measureRepo.collection.count().toFuture, dbTimeout) shouldBe 4
-        val result = Await.result(measureRepo.getMesuresInRange("testExtId", 120, 140), dbTimeout)
+        val result = Await.result(measureRepo.getMesuresInRange(Seq("testKey"), 120, 140), dbTimeout)
         result.size shouldBe 1
         result.head.data.size shouldBe 1
       }

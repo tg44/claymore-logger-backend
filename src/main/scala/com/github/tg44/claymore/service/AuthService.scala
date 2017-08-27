@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit
 
 import akka.util.ByteString
 import com.github.tg44.claymore.utils.GeneralUtil
+import org.mongodb.scala.Completed
 import scaldi.{Injectable, Injector}
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
@@ -40,10 +41,10 @@ class AuthService(implicit injector: Injector, ec: ExecutionContextExecutor, sys
     .build()
 
   def authenticateWithApiKey(secret: String): FResp[String] = {
-    userRepo.findUserByApiKey(secret).map { usr =>
-      usr.fold[Resp[String]](
+    userRepo.findKeyBySecret(secret).map {
+      _.fold[Resp[String]](
         Left(AuthenticationError)
-      )(user => Right(jwt.encode(JwtServicePayload(user.extid))))
+      )(key => Right(jwt.encode(JwtServicePayload(key.value))))
     }
   }
 
@@ -59,6 +60,18 @@ class AuthService(implicit injector: Injector, ec: ExecutionContextExecutor, sys
       .map(
         _.fold[Resp[ApiKey]](
           Left(AuthenticationError)
+        )(
+          Right(_)
+        )
+      )
+  }
+
+  def importNewApiKey(userExtId: String, fromExt: String, name: String, secret: String): FResp[Completed] = {
+    userRepo
+      .importApiKey(fromExt, userExtId, name, secret)
+      .map(
+        _.fold[Resp[Completed]](
+          Left(NoEntityFound)
         )(
           Right(_)
         )
