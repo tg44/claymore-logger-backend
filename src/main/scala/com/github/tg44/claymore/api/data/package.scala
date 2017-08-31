@@ -5,14 +5,14 @@ import com.github.tg44.claymore.service.StatisticDataWrapper
 
 package object data {
 
-  case class StatisticDataresponseDto(latestDataPerHost: Map[String, StatisticData],
+  case class StatisticDataResponseDto(latestDataPerHost: Map[String, StatisticData],
                                       summarizedCurrencies24h: Map[String, CurrencyData],
                                       summarizedCurrencies3d: Map[String, CurrencyData],
                                       summarizedCurrencies7d: Map[String, CurrencyData],
                                       summarizedCurrencies14d: Map[String, CurrencyData])
 
-  object StatisticDataresponseDto {
-    def apply(data: StatisticDataWrapper): StatisticDataresponseDto = StatisticDataresponseDto(
+  object StatisticDataResponseDto {
+    def apply(data: StatisticDataWrapper): StatisticDataResponseDto = StatisticDataResponseDto(
       data.latestDataPerHost,
       data.summarizedCurrencies24h.mapValues(CurrencyData(_)),
       data.summarizedCurrencies3d.mapValues(CurrencyData(_)),

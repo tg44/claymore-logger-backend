@@ -20,7 +20,7 @@ class StatisticalDataApi(implicit injector: Injector) extends StatDataJsonSuppor
       authenticatedWithData { jwtData =>
         onSuccess(statisticDataService.getLastMeasures(jwtData.userId, GeneralUtil.nowInUnix - (14 * 24 * 60 * 60), GeneralUtil.nowInUnix)) {
           case Right(data) =>
-            complete(StatisticDataresponseDto(data))
+            complete(StatisticDataResponseDto(data))
           case Left(_) => complete(HttpResponse(BadRequest))
         }
       }

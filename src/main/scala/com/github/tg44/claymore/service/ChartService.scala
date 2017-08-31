@@ -117,23 +117,27 @@ class ChartService(implicit injector: Injector, ec: ExecutionContextExecutor) ex
 
 object ChartService {
   private[service] def aggregateCurrenciesByTime(measures: Seq[Measure], frame: Long = 300): Map[String, Map[Long, Seq[CurrencyInformation]]] = {
-    val lower = measures.minBy(_.fromTimeStamp).fromTimeStamp
-    val measureToMax = measures.maxBy(_.toTimeStamp).toTimeStamp
-    val upper = if (measureToMax > GeneralUtil.nowInUnix) GeneralUtil.nowInUnix else measureToMax
+    if (measures.isEmpty) {
+      Map()
+    } else {
+      val lower = measures.minBy(_.fromTimeStamp).fromTimeStamp
+      val measureToMax = measures.maxBy(_.toTimeStamp).toTimeStamp
+      val upper = if (measureToMax > GeneralUtil.nowInUnix) GeneralUtil.nowInUnix else measureToMax
 
-    val timestamps = GeneralUtil.generateTimeStamps(lower, upper, frame)
+      val timestamps = GeneralUtil.generateTimeStamps(lower, upper, frame)
 
-    measures
-      .flatMap(_.data)
-      .flatMap(statData => statData.currencyInformations.map(currInfo => (currInfo.currency, statData.timeStamp, currInfo)))
-      .foldLeft(Map[String, Seq[(Long, CurrencyInformation)]]()) {
-        case (acc, (currency, ts, info)) =>
-          acc + (currency -> (acc.getOrElse(currency, Seq.empty[(Long, CurrencyInformation)]) ++ Seq((ts, info))))
-      }
-      .map {
-        case (currency, timeMeasureList) =>
-          currency -> aggregateByTime(timeMeasureList, timestamps)
-      }
+      measures
+        .flatMap(_.data)
+        .flatMap(statData => statData.currencyInformations.map(currInfo => (currInfo.currency, statData.timeStamp, currInfo)))
+        .foldLeft(Map[String, Seq[(Long, CurrencyInformation)]]()) {
+          case (acc, (currency, ts, info)) =>
+            acc + (currency -> (acc.getOrElse(currency, Seq.empty[(Long, CurrencyInformation)]) ++ Seq((ts, info))))
+        }
+        .map {
+          case (currency, timeMeasureList) =>
+            currency -> aggregateByTime(timeMeasureList, timestamps)
+        }
+    }
   }
 
   private[service] def aggregateMeasuresByHost(measures: Seq[Measure]): Map[String, Seq[StatisticData]] = {
