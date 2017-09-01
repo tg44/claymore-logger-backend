@@ -30,6 +30,7 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-native" % "3.5.0",
   "org.mongodb.scala" %% "mongo-scala-driver" % "2.1.0",
   "com.github.simplyscala" %% "scalatest-embedmongo" % "0.2.4" % Test,
+  "io.netty" % "netty-all" % "4.1.15.Final",
   "org.scaldi" %% "scaldi" % "0.5.8",
   "org.scaldi" %% "scaldi-akka" % "0.5.8"
 )
