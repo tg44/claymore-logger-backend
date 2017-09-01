@@ -103,7 +103,9 @@ class AuthService(implicit injector: Injector, ec: ExecutionContextExecutor, sys
         }
       }
     } recover {
-      case _ => Left(AuthenticationError)
+      case ex =>
+        ex.printStackTrace()
+        Left(AuthenticationError)
     }
   }
 
