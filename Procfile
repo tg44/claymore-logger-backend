@@ -1,0 +1,1 @@
+web: target/universal/stage/bin/claymore-logger-backend -Dendpoint.port=$PORT
