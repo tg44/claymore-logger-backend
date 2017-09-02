@@ -139,6 +139,7 @@ class AuthService(implicit injector: Injector, ec: ExecutionContextExecutor, sys
     val request = HttpRequest(method = HttpMethods.POST, uri = Uri(tokenEndpoint), entity = entity)
     for {
       response <- Http().singleRequest(request)
+      _ = if(response.status == StatusCodes.Unauthorized) println("request to google get unauth") else println(s"${response.status} status after google auth")
       body <- Unmarshal(response.entity).to[AuthResponse]
     } yield body
   }
